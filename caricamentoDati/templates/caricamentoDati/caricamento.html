@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}
+  Valutazioni
+{% endblock %}
+{% block content %}
+  <h1>Caricamento</h1>
+  <div class="main">
+    <h1>Caricamento File CSV</h1>
+    <form method="post" enctype="multipart/form-data" action="{% url 'caricamento_con_file' filename='temp' valutazione='valutazione_nome'%}">
+        {% csrf_token %}
+        <label for="filename">Seleziona un file CSV:</label>
+        <input type="file" name="filename" id="filename">
+        <br>
+        <label for="valutazione">Seleziona una valutazione:</label>
+        <select name="valutazione" id="valutazione">
+            {% for valutazione in valutazioni %}
+                <option value="{{ valutazione.nome }}">{{ valutazione.nome }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button class="btn" type="submit">Carica</button>
+    </form>
+    
+
+    <h1>Crea Nuova Valutazione</h1>
+    <form method="post" action="{% url 'crea_valutazione' %}">
+      {% csrf_token %}
+      <label for="nome">Nome:</label>
+      <input type="text" name="nome" id="nome" required />
+      <br />
+      <label for="anno">Anno:</label>
+      <input type="number" name="anno" id="anno" min="1000" max="9999" value="{{ current_year }}" required />
+      <br />
+      <button class="btn" type="submit">Crea Valutazione</button>
+    </form>
+  </div>
+{% endblock %}

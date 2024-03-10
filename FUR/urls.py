@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from FUR import views
 from caricamentoDati import views as views_caricamentoDati
@@ -23,4 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('FUR/', views.FUR, name='FUR'),
     path('valutazioni/', include('caricamentoDati.urls')),
+    #path('caricamento/', include('caricamentoDati.urls')),
+    #path('caricamento_con_file/', include('caricamentoDati.urls')),
+    #path('caricamento/', views_caricamentoDati.caricamento, name='caricamento'),
+    #path('^caricamento_con_file/(?P<csv_file_name>\(.*))/$', views_caricamentoDati.caricamento_con_file, name='caricamento_con_file'),
 ]

@@ -8,10 +8,10 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 
 class Valutazione(models.Model):
     STATUS_CHOICES = (
-        ('vuoto', 'Vuoto'),
-        ('da_valutare', 'Da valutare'),
-        ('in_fase_di_valutazione', 'In fase di valutazione'),
-        ('terminato', 'Terminato'),
+        ('Vuoto', 'Vuoto'),
+        ('Da Valutare', 'Da valutare'),
+        ('In fase di valutazione', 'In fase di valutazione'),
+        ('Terminato', 'Terminato'),
     )
 
     nome = models.CharField(max_length=100, primary_key=True)
@@ -20,9 +20,9 @@ class Valutazione(models.Model):
     dataCaricamento = models.DateField(
         blank=True, null=True, verbose_name="data di caricamento")
     status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default='')
+        max_length=50, choices=STATUS_CHOICES, default='Vuoto')
     numeroPubblicazioni = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)], default=1, verbose_name="numero di pubblicazioni da selezionare")
+        validators=[MinValueValidator(1)], default=3, verbose_name="numero di pubblicazioni da selezionare")
 
     def __str__(self):
         return self.nome
@@ -80,12 +80,6 @@ class PubblicazionePresentata(models.Model):
         constraints = [models.UniqueConstraint(
             fields=['handle', 'valutazione'], name='chiaveComposta')]
 
-    def get_autore_name(self):
-        return self.relazionedocentepubblicazione.autore.cognome_nome
-
-    def get_scelta(self):
-        return self.relazionedocentepubblicazione.scelta
-
     def __str__(self):
         return self.titolo
 
@@ -104,7 +98,7 @@ class RelazioneDocentePubblicazione(models.Model):
             fields=['pubblicazione', 'autore'], name='chiavePrimariaComposta')]
 
     def __str__(self):
-        return '{} - {}'.format(self.autore.cognome_nome, self.pubblicazione.titolo)
+        return self.pubblicazione.titolo
 
     class Meta:
         verbose_name_plural = "Relazioni Docente-Pubblicazione"
