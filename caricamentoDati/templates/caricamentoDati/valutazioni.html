@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}
+  Valutazioni
+{% endblock %}
+{% block content %}
+  <h1>Valutazioni</h1>
+  <d1>
+    {% for valutazione in valutazioni %}
+      <dt>
+        <strong>"{{ valutazione.nome }}"</strong>
+      </dt>
+      <dd><em>{{ valutazione.anno }}</em> - {{ valutazione.status }}</dd>
+      <dd><small>caricato il {{ valutazione.dataCaricamento|date:'F \d\e\l Y' }}</small></dd>
+      <br />
+    {% endfor %}
+  </d1>
+{% endblock %}
