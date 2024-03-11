@@ -8,10 +8,11 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 
 class Valutazione(models.Model):
     STATUS_CHOICES = (
-        ('Vuoto', 'Vuoto'),
-        ('Da Valutare', 'Da valutare'),
-        ('In fase di valutazione', 'In fase di valutazione'),
-        ('Terminato', 'Terminato'),
+        ('Vuota', 'Vuota'),
+        ('Pubblicazioni caricate', 'Pubblicazioni caricate'),
+        ('Assegnamento calcolato', 'Assegnamento calcolato'),
+        ('Assegnamento completato', 'Assegnamento completato'),
+        ('Chiusa', 'Chiusa'),
     )
 
     nome = models.CharField(max_length=100, primary_key=True)
@@ -20,9 +21,11 @@ class Valutazione(models.Model):
     dataCaricamento = models.DateField(
         blank=True, null=True, verbose_name="data di caricamento")
     status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default='Vuoto')
+        max_length=50, choices=STATUS_CHOICES, default='Vuota')
     numeroPubblicazioni = models.PositiveIntegerField(
         validators=[MinValueValidator(1)], default=3, verbose_name="numero di pubblicazioni da selezionare")
+    dataCaricamentoPubblicazioni = models.DateField(
+        blank=True, null=True, verbose_name="data di caricamento delle pubblicazioni")
 
     def __str__(self):
         return self.nome

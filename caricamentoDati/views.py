@@ -1,4 +1,5 @@
-import csv, datetime
+import csv
+import datetime
 from django.db import transaction
 
 from django.shortcuts import render, redirect
@@ -40,8 +41,7 @@ def caricamento(request):
 def caricamento_con_file(request, filename, valutazione):
     if request.method == 'POST':
         csv_file = request.FILES.get('filename')
-        valutazione_nome = request.POST.get('valutazione')
-        valutazione = Valutazione.objects.get(nome=valutazione_nome)
+        valutazione = Valutazione.objects.get(nome=valutazione)
         elenco = []
         intestazione = ['anno_di_pubblicazione', 'autore', 'codice_fiscale', 'handle', 'doi', 'titolo',
                         'tipologia_collezione',
@@ -77,8 +77,8 @@ def caricamento_con_file(request, filename, valutazione):
                         miglior_quartile = int(riga[9])
                     num_coautori_dip = riga[10]
                     codice_fiscale = riga[11]
-                    autore=autore.upper()
-                    codice_fiscale=codice_fiscale.upper()
+                    autore = autore.upper()
+                    codice_fiscale = codice_fiscale.upper()
 
                     if not Docente.objects.filter(codiceFiscale=codice_fiscale).exists():
                         Docente(codiceFiscale=codice_fiscale,
@@ -102,11 +102,12 @@ def caricamento_con_file(request, filename, valutazione):
                                                                         autore__codiceFiscale=codice_fiscale).exists():
                         RelazioneDocentePubblicazione(pubblicazione=PubblicazionePresentata.objects.get(handle=handle),
                                                       autore=Docente.objects.get(codiceFiscale=codice_fiscale)).save()
-        
-        valutazione.status = "Da Valutare"
+
+        valutazione.status = "Pubblicazioni caricate"
+        valutazione.dataCaricamentoPubblicazioni = datetime.date.today()
         valutazione.save()
 
-    return redirect('valutazioni')
+    return redirect('modifica_valutazione', valutazione)
 
 
 def crea_valutazione(request):
@@ -115,7 +116,41 @@ def crea_valutazione(request):
         anno = request.POST.get("anno")
 
         nuova_valutazione = Valutazione(
-            nome=nome, anno=anno, dataCaricamento=datetime.date.today(), status = "vuoto")
+            nome=nome, anno=anno, dataCaricamento=datetime.date.today(), status="Vuota")
         nuova_valutazione.save()
 
-    return redirect('caricamento')
+    return redirect('valutazioni')
+
+
+def cancella_valutazione_(request):
+    return redirect('valutazioni')
+
+
+def cancella_valutazione(request, valutazione_nome):
+    valutazioneDaCancellate = Valutazione.objects.filter(nome=valutazione_nome)
+    valutazioneDaCancellate.delete()
+    return redirect('valutazioni')
+
+
+def modifica_valutazione_(request):
+    return redirect('valutazioni')
+
+
+def modifica_valutazione(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    context = {'valutazione': valutazione, 'pubblicazioni': PubblicazionePresentata.objects.filter(
+        valutazione=valutazione).order_by('titolo')}
+    return render(request, 'caricamentoDati/modifica.html', context)
+
+
+def cancella_pubblicazioni_tot_(request):
+    return redirect('modifica_valutazione')
+
+
+def cancella_pubblicazioni_tot(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    pubblicazioni = PubblicazionePresentata.objects.filter(
+        valutazione=valutazione)
+    for pubblicazione in pubblicazioni:
+        pubblicazione.delete()
+    return redirect('modifica_valutazione', valutazione)

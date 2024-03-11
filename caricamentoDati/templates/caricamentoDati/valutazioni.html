@@ -3,15 +3,100 @@
   Valutazioni
 {% endblock %}
 {% block content %}
-  <h1>Valutazioni</h1>
-  <d1>
-    {% for valutazione in valutazioni %}
-      <dt>
-        <strong>"{{ valutazione.nome }}"</strong>
-      </dt>
-      <dd><em>{{ valutazione.anno }}</em> - {{ valutazione.status }}</dd>
-      <dd><small>caricato il {{ valutazione.dataCaricamento|date:'F \d\e\l Y' }}</small></dd>
-      <br />
-    {% endfor %}
-  </d1>
+  <div style="display: flex;">
+    <div style="flex: 3; padding: 20px;">
+      <h1>Valutazioni</h1>
+      <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+        <tbody>
+          <tr>
+            <td style="vertical-align: top; text-align: left;">
+              <b>Anno</b><br />
+            </td>
+            <td style="vertical-align: top; text-align: left;">
+              <b>Nome</b><br />
+            </td>
+            <td style="vertical-align: top; text-align: left;">
+              <b>Numero di Pubblicazioni per autore</b><br />
+            </td>
+            <td style="vertical-align: top; text-align: left;">
+              <b>Stato</b><br />
+            </td>
+            <td style="vertical-align: top; text-align: left;">
+              <b>Azioni</b><br />
+            </td>
+          </tr>
+
+          <!--Riga di una valutazione-->
+          {% for valutazione in valutazioni %}
+            <tr>
+              <td style="vertical-align: top; text-align: left;">
+                {{ valutazione.anno }}<br />
+              </td>
+              <td style="vertical-align: top; text-align: left;">
+                {{ valutazione.nome }}<br />
+              </td>
+              <td style="vertical-align: top; text-align: center;">
+                {{ valutazione.numeroPubblicazioni }}<br />
+              </td>
+              <td style="vertical-align: top; text-align: left;">
+                {% if valutazione.status == 'Pubblicazioni caricate' %}
+                  {{ valutazione.status }} in data {{ valutazione.dataCaricamentoPubblicazioni }}
+                {% else %}
+                  {{ valutazione.status }}
+                {% endif %}
+                <br />
+              </td>
+              <td style="vertical-align: top; text-align: left;">
+                <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                <button type="submit">Modifica</button>
+                </form>
+
+                <form action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit">Cancella</button>
+                </form>
+                <button type="button">Assegna Pubblicazioni</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Sezione di caricamento dati -->
+    <div style="flex: 1; padding: 20px;">
+      <!-- 
+      <h1>Caricamento</h1>
+      <div class="main">
+        <h1>Caricamento File CSV</h1>
+        <form method="post" enctype="multipart/form-data" action="{% url 'caricamento_con_file' filename='temp' valutazione='valutazione_nome'%}">
+            {% csrf_token %}
+            <label for="filename">Seleziona un file CSV:</label>
+            <input type="file" name="filename" id="filename">
+            <br>
+            <label for="valutazione">Seleziona una valutazione:</label>
+            <select name="valutazione" id="valutazione">
+                {% for valutazione in valutazioni %}
+                    <option value="{{ valutazione.nome }}">{{ valutazione.nome }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <button class="btn" type="submit">Carica</button>
+        </form>
+         -->
+
+      <h1>Crea Nuova Valutazione</h1>
+      <form method="post" action="{% url 'crea_valutazione' %}">
+        {% csrf_token %}
+        <label for="nome">Nome:</label>
+        <input type="text" name="nome" id="nome" required />
+        <br/>
+        <label for="anno">Anno:</label>
+        <input type="number" name="anno" id="anno" min="2000" max="9999" value="{{ current_year }}" required />
+        <br />
+        <button class="btn" type="submit">Crea Valutazione</button>
+      </form>
+    </div>
+  </div>
 {% endblock %}
