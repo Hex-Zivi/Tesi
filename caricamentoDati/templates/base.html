@@ -13,10 +13,28 @@
     <!-- stile CSS -->
     <link href="{% static 'styles.css' %}" rel="stylesheet" type="text/css" />
   </head>
-  <body>
-    <div class="header">
-      <img class="img_header" alt="Logo" src="{% static 'logo-univr.png' %}" />
+  
+  <div class="header">
+    <div class="id">{{ login }}
+        <div class="logout">
+            <button onclick="alert('Chiudere la pagina corrente per scollegarsi.')">Logout</button>
+        </div>
     </div>
+    <div class="container">
+        <div><a href="http://www.univr.it" target="blanc"><img alt="univr" class="img-responsive, img_header"
+                                                               src="{% static 'logo-univr.png' %}"
+                                                               style="width:60px;height:60px;"/></a></div>
+        <div class="header-heading"><a href="http://www.univr.it/" target="blank">UNIVERSIT&Agrave; <br/>di<strong>
+            VERONA</strong></a></div>
+        <div class="header-heading"><a href="http://www.di.univr.it/" target="blank">Dipartimento<br/>di<strong>
+            INFORMATICA</strong></a></div>
+        <div class="header-heading"><br/><a href=""><strong>FONDO FUR</strong></a></div>
+    </div>
+</div>
+
+
+  <body>
+    
 
     <div class="nav-bar">
       <div class="container">
@@ -33,5 +51,6 @@
 
       {% endblock %}
     </div>
+    
   </body>
 </html>

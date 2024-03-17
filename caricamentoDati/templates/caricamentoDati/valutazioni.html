@@ -56,7 +56,10 @@
                   {% csrf_token %}
                   <button type="submit">Cancella</button>
                 </form>
-                <button type="button">Assegna Pubblicazioni</button>
+                <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit">Assegna Pubblicazioni</button>
+                </form>
               </td>
             </tr>
           {% endfor %}

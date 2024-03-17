@@ -72,7 +72,7 @@ def caricamento_con_file(request, filename, valutazione):
                     titolo_rivista_atti = riga[7]
                     indicizzato_scopus = riga[8]
                     if riga[9] == '':
-                        miglior_quartile = None
+                        miglior_quartile = 0
                     else:
                         miglior_quartile = int(riga[9])
                     num_coautori_dip = riga[10]
@@ -154,3 +154,76 @@ def cancella_pubblicazioni_tot(request, valutazione_nome):
     for pubblicazione in pubblicazioni:
         pubblicazione.delete()
     return redirect('modifica_valutazione', valutazione)
+
+
+def cancella_pubblicazione_singola(request, pubblicazione_titolo, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    PubblicazionePresentata.objects.get(titolo=pubblicazione_titolo).delete()
+    return redirect('modifica_valutazione', valutazione)
+
+
+def assegnamento(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
+        pubblicazione__valutazione=valutazione)
+
+    docenti_info = []
+
+    for docente in Docente.objects.all().order_by('cognome_nome'):
+        num_pubblicazioni_richieste = valutazione.numeroPubblicazioni
+        num_pubblicazioni_assegnate = relazioni_docente_pubblicazione.filter(
+            autore=docente).exclude(scelta__isnull=True).exclude(scelta=0).count()
+        quartili = sorted(set(relazione.pubblicazione.miglior_quartile for relazione in relazioni_docente_pubblicazione.filter(
+            autore=docente).exclude(scelta__isnull=True).exclude(scelta=0)), reverse=True)
+        pubblicazioni_totali = relazioni_docente_pubblicazione.filter(
+            autore=docente).count()
+        formatted_quartili = ['Q{}'.format(
+            q) if q != 0 else '_' for q in quartili]
+
+        docente_info = {
+            'codice_fiscale': docente.codiceFiscale,
+            'cognome_nome': docente.cognome_nome,
+            'num_pubblicazioni_richieste': num_pubblicazioni_richieste,
+            'num_pubblicazioni_assegnate': num_pubblicazioni_assegnate,
+            'pubblicazioni_totali': pubblicazioni_totali,
+            'quartili': formatted_quartili
+
+        }
+
+        docenti_info.append(docente_info)
+
+    informazioni = {'docenti_info': docenti_info}
+    context = {'valutazione': valutazione,
+               'informazioni_docente': informazioni}
+    return render(request, 'caricamentoDati/assegnamento.html', context)
+
+
+def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
+    relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
+        pubblicazione__valutazione=valutazione, autore=docente)
+
+    pubblicazioni_info = []
+
+    for relazione in relazioni_docente_pubblicazione:
+        pubblicazione = relazione.pubblicazione
+        altri_autori = [autore.cognome_nome for autore in Docente.objects.filter(
+            relazionedocentepubblicazione__pubblicazione=pubblicazione, relazionedocentepubblicazione__scelta__gt=0
+        ).exclude(codiceFiscale=docente_codice_fiscale).distinct()]
+        valore_scelta = relazione.scelta
+
+        pubblicazione_info = {
+            'titolo': pubblicazione.titolo,
+            'altri_autori': altri_autori,
+            'valore_scelta': valore_scelta
+        }
+
+        pubblicazioni_info.append(pubblicazione_info)
+
+    context = {'valutazione': valutazione,
+               'docente':docente,
+               'pubblicazioni_info': pubblicazioni_info}
+    return render(request, 'caricamentoDati/docente_pubblicazioni.html', context)
+
+

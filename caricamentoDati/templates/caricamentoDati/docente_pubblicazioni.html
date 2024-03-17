@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}
+Vista pubblicazioni del docente
+{% endblock %}
+{% block content %}
+<div class="main">
+  <h1>Pubblicazioni di {{ docente.cognome_nome }} per {{ valutazione.nome }}, {{ valutazione.anno }}</h1>
+  <div style="display: flex; padding-top: 40px;">
+    <form method="post">
+      {% csrf_token %}
+      <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+        <tr>
+          <td style="vertical-align: top; text-align: left;"><b>Titolo</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Selezionato anche da:</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Selezione</b></td>
+        </tr>
+        {% for pubblicazione in pubblicazioni_info %}
+        <tr>
+          <td>{{ pubblicazione.titolo }}</td>
+          <td>
+            {% for autore in pubblicazione.altri_autori %}
+            {{ autore }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </td>
+          <td><input type="checkbox" name="selezione_pubblicazione" value="{{ pubblicazione.id }}" {% if pubblicazione.valore_scelta != 0 %}checked{% endif %}></td>
+        </tr>
+        {% endfor %}
+      </table>
+      <div style="padding-left: 20px;">
+        <button type="submit" class="btn">Salva selezioni</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+

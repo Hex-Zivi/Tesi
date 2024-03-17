@@ -74,8 +74,8 @@ class PubblicazionePresentata(models.Model):
     titolo_rivista_atti = models.CharField(
         max_length=200, null=True, verbose_name="titolo della rivista o atti")
     indicizzato_scopus = models.BooleanField(default=False)
-    miglior_quartile = models.IntegerField(blank=True, null=True, validators=[
-                                           MinValueValidator(1), MaxValueValidator(4)], verbose_name="miglior quartile")
+    miglior_quartile = models.IntegerField(blank=True, default = 0, validators=[
+                                           MinValueValidator(0), MaxValueValidator(4)], verbose_name="miglior quartile")
     num_coautori_dip = models.PositiveIntegerField(
         default=1, validators=[MinValueValidator(1)], verbose_name="numero di coautori del dipartimento")
 

@@ -31,4 +31,13 @@ urlpatterns = [
 
     re_path('^cancella_pubblicazioni_tot/(?P<valutazione_nome>.*)/$', views.cancella_pubblicazioni_tot,
          name='cancella_pubblicazioni_tot'),
+
+     re_path('^cancella_pubblicazione_singola/(?P<valutazione_nome>.*)/(?P<pubblicazione_titolo>.*)/$', views.cancella_pubblicazione_singola,
+         name='cancella_pubblicazione_singola'),
+
+     re_path('^assegnamento/(?P<valutazione_nome>.*)/$',
+            views.assegnamento, name="assegnamento"),
+
+     re_path('^docente_pubblicazioni/(?P<valutazione_nome>.*)/(?P<docente_codice_fiscale>.*)/$',
+            views.docente_pubblicazioni, name="docente_pubblicazioni"),
 ]

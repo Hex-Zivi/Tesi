@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}
+  Assegnamento delle Pubblicazioni
+{% endblock %}
+{% block content %}
+  <div class="main">
+    <h1>Assegnamento delle Pubblicazioni per {{ valutazione.nome }}, {{ valutazione.anno }}</h1>
+    <div style="display: flex;">
+      <div style="padding: 20px;">
+        <h2>Calcola assegnamento</h2>
+
+        <button class="btn" type="submit">Calcola</button>
+      </div>
+      <div style="padding: 20px;">
+        <h2>Azzera assegnamento</h2>
+        <button class="btn" type="submit">Azzera</button>
+      </div>
+    </div>
+
+    <div style="display: flex; padding-top: 40px;">
+      <table style=" text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+        <tr>
+          <td style="vertical-align: top; text-align: left;">
+            <b>Cognome e Nome</b>
+          </td>
+          <td style="vertical-align: top; text-align: left;">
+            <b>Numero di pubblicazioni richieste</b>
+          </td>
+          <td style="vertical-align: top; text-align: left;">
+            <b>Numero di pubblicazioni assegnate</b>
+          </td>
+          <td style="vertical-align: top; text-align: left;">
+            <b>Numero di pubblicazioni</b>
+          </td>
+          <td style="vertical-align: top; text-align: left;">
+            <b>Quartili selezionati</b>
+          </td>
+        </tr>
+        {% for docente in informazioni_docente.docenti_info %}
+          <tr>
+            <td>
+              <a href="{% url 'docente_pubblicazioni' valutazione.nome docente.codice_fiscale %}">{{ docente.cognome_nome }}</a>
+            </td>
+            <td>{{ docente.num_pubblicazioni_richieste }}</td>
+            <td>{{ docente.num_pubblicazioni_assegnate }}</td>
+            <td>{{ docente.pubblicazioni_totali }}</td>
+            <td>{{ docente.quartili|join:', ' }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+{% endblock %}
