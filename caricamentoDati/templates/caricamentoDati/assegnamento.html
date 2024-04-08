@@ -23,6 +23,53 @@
           <button class="btn" type="submit">Azzera</button>
         </form>
       </div>
+
+
+<!-- FORM PER L'AGGIUNTA DI UNA PUBBLICAZIONE
+      <div style="padding: 20px;">
+        <h2>Aggiungi pubblicazione</h2>
+        <form method="post" >
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">
+              <label for="titolo">Titolo:</label><br>
+              <input type="text" id="titolo" name="titolo" required><br><br>
+      
+              <label for="anno_pubblicazione">Anno di pubblicazione:</label><br>
+              <input type="number" id="anno_pubblicazione" name="anno_pubblicazione" min="1000" max="9999" value="{{ current_year }}" required><br><br>
+      
+              <label for="issn_isbn">ISSN o ISBN:</label><br>
+              <input type="text" id="issn_isbn" name="issn_isbn"><br><br>
+      
+              <label for="doi">DOI:</label><br>
+              <input type="text" id="doi" name="doi"><br><br>
+            </div>
+            <div class="col-md-6">
+              <label for="tipologia_collezione">Tipologia della collezione:</label><br>
+              <input type="text" id="tipologia_collezione" name="tipologia_collezione" required><br><br>
+      
+              <label for="titolo_rivista_atti">Titolo della rivista o atti:</label><br>
+              <input type="text" id="titolo_rivista_atti" name="titolo_rivista_atti"><br><br>
+      
+              <label for="indicizzato_scopus">Indicizzato su Scopus:</label><br>
+              <input type="checkbox" id="indicizzato_scopus" name="indicizzato_scopus"><br><br>
+      
+              <label for="miglior_quartile">Miglior quartile:</label><br>
+              <input type="number" id="miglior_quartile" name="miglior_quartile" min="0" required><br><br>
+      
+              <label for="autori">Autori:</label><br>
+              <select id="autori" name="autori[]" multiple required>
+                {% for docente in lista_docenti %}
+                <option value="{{ docente.codiceFiscale }}">{{ docente.cognome_nome }}</option>
+                {% endfor %}
+              </select><br><br>
+            </div>
+          </div>
+      
+          <button class="btn" type="submit">Aggiungi</button>
+        </form>
+      </div>
+-->
     </div>
 
     <div style="display: flex; padding-top: 40px;">
