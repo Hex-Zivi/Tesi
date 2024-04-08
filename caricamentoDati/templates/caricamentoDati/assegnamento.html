@@ -9,11 +9,19 @@
       <div style="padding: 20px;">
         <h2>Calcola assegnamento</h2>
 
-        <button class="btn" type="submit">Calcola</button>
+        <form method="post" action="{% url 'assegnamento_algoritmo' valutazione.nome %}">
+          {% csrf_token %}
+
+          <button class="btn" type="submit">Calcola</button>
+        </form>
       </div>
       <div style="padding: 20px;">
         <h2>Azzera assegnamento</h2>
-        <button class="btn" type="submit">Azzera</button>
+        <form action="{% url 'azzera_assegnamento' valutazione.nome %}" method="post">
+          {% csrf_token %}
+
+          <button class="btn" type="submit">Azzera</button>
+        </form>
       </div>
     </div>
 
@@ -39,6 +47,8 @@
         {% for docente in informazioni_docente.docenti_info %}
           <tr>
             <td>
+              <input type="checkbox" {% if docente.num_pubblicazioni_assegnate == docente.num_pubblicazioni_richieste or docente.num_pubblicazioni_assegnate == docente.pubblicazioni_totali %}checked{% endif %} disabled>
+              &nbsp;
               <a href="{% url 'docente_pubblicazioni' valutazione.nome docente.codice_fiscale %}">{{ docente.cognome_nome }}</a>
             </td>
             <td>{{ docente.num_pubblicazioni_richieste }}</td>

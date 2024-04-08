@@ -38,6 +38,15 @@ urlpatterns = [
      re_path('^assegnamento/(?P<valutazione_nome>.*)/$',
             views.assegnamento, name="assegnamento"),
 
+     re_path('^assegnamento_algoritmo/(?P<valutazione_nome>.*)/$',
+            views.assegnamento_algoritmo, name="assegnamento_algoritmo"),
+
+     re_path('^azzera_assegnamento/(?P<valutazione_nome>.*)/$',
+            views.azzera_assegnamento, name="azzera_assegnamento"),
+
      re_path('^docente_pubblicazioni/(?P<valutazione_nome>.*)/(?P<docente_codice_fiscale>.*)/$',
             views.docente_pubblicazioni, name="docente_pubblicazioni"),
+
+     re_path('^salva_selezioni/(?P<valutazione_nome>.*)/(?P<docente_codice_fiscale>.*)/$',
+            views.salva_selezioni, name="salva_selezioni"),
 ]

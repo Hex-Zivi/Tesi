@@ -8,7 +8,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
 from .models import *
+from django.db.models import Count
 from django.shortcuts import render
+
+
+from pdb import set_trace
 
 
 def valutazioni(request):
@@ -70,7 +74,11 @@ def caricamento_con_file(request, filename, valutazione):
                     tipologia_collezione = riga[5]
                     issn_isbn = riga[6]
                     titolo_rivista_atti = riga[7]
-                    indicizzato_scopus = riga[8]
+                    indicizzato_scopus = riga[8].lower()
+                    if indicizzato_scopus in ['vero', '1', 'true']:
+                        indicizzato_scopus = True
+                    else:
+                        indicizzato_scopus = False
                     if riga[9] == '':
                         miglior_quartile = 0
                     else:
@@ -209,21 +217,224 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
     for relazione in relazioni_docente_pubblicazione:
         pubblicazione = relazione.pubblicazione
         altri_autori = [autore.cognome_nome for autore in Docente.objects.filter(
+            relazionedocentepubblicazione__pubblicazione=pubblicazione
+        ).exclude(codiceFiscale=docente_codice_fiscale).distinct()]
+        altri_autori_scelta = [autore.cognome_nome for autore in Docente.objects.filter(
             relazionedocentepubblicazione__pubblicazione=pubblicazione, relazionedocentepubblicazione__scelta__gt=0
         ).exclude(codiceFiscale=docente_codice_fiscale).distinct()]
         valore_scelta = relazione.scelta
+        quartile = pubblicazione.miglior_quartile
 
         pubblicazione_info = {
             'titolo': pubblicazione.titolo,
             'altri_autori': altri_autori,
-            'valore_scelta': valore_scelta
+            'altri_autori_scelta': altri_autori_scelta,
+            'valore_scelta': valore_scelta,
+            'quartile': quartile
         }
 
         pubblicazioni_info.append(pubblicazione_info)
 
     context = {'valutazione': valutazione,
-               'docente':docente,
+               'docente': docente,
+               'docente_codice_fiscale': docente.codiceFiscale,
                'pubblicazioni_info': pubblicazioni_info}
     return render(request, 'caricamentoDati/docente_pubblicazioni.html', context)
 
 
+# Vista di assegnamento delle pubblicazioni nella valutazione
+def calcola_numero_coautori_possibili(pubblicazione, relazioni_docente_pubblicazione, docenti):
+    coautori_pubblicazione = set()
+    for relazione in relazioni_docente_pubblicazione.filter(pubblicazione=pubblicazione):
+        coautori_pubblicazione.add(relazione.autore)
+    return len(coautori_pubblicazione.intersection(docenti))
+
+
+def rimuovi_docente(docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione):
+    if docente in docenti:
+        print("Docente rimosso:", docente)
+        relazioni_docente_pubblicazione = relazioni_docente_pubblicazione.exclude(
+            autore=docente)
+        docenti = docenti.exclude(pk=docente.pk)
+        for pubblicazione in pubblicazioni:
+            numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
+                pubblicazione, relazioni_docente_pubblicazione, docenti)
+        print("Numero di relazioni:", len(relazioni_docente_pubblicazione)," Numero di docenti:", len(docenti))
+    return docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione
+
+
+def assegnamento_algoritmo(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    numero_selezioni_valutazione = valutazione.numeroPubblicazioni
+    pubblicazioni = PubblicazionePresentata.objects.filter(
+        valutazione=valutazione)
+    relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
+        pubblicazione__valutazione=valutazione)
+    docenti = Docente.objects.annotate(num_relazioni=Count(
+        'relazionedocentepubblicazione')).order_by('num_relazioni')
+
+    numero_selezioni_docente = {docente.pk: 0 for docente in docenti}
+
+    numero_coautori_possibili_pubblicazione = {}
+
+    for pubblicazione in pubblicazioni:
+        numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
+            pubblicazione, relazioni_docente_pubblicazione, docenti)
+
+    progresso = 1
+    giro = 0
+
+    while progresso == 1:
+        journal_1_singoloAutore = pubblicazioni.filter(
+            miglior_quartile__in=[0, 1], num_coautori_dip=1)
+        journal_2_singoloAutore = pubblicazioni.filter(
+            miglior_quartile=2, num_coautori_dip=1)
+        journal_3_singoloAutore = pubblicazioni.filter(
+            num_coautori_dip=1).exclude(miglior_quartile__in=[0, 1, 2])
+
+        journal_1 = pubblicazioni.filter(
+            miglior_quartile__in=[0, 1]).exclude(num_coautori_dip=1)
+        journal_2 = pubblicazioni.filter(
+            miglior_quartile=2).exclude(num_coautori_dip=1)
+        journal_3 = pubblicazioni.exclude(
+            miglior_quartile__in=[0, 1, 2], num_coautori_dip=1)
+
+        progresso = 0
+        giro += 1
+
+        # Selezione di pubblicazioni con autore singolo
+        for docente in docenti.order_by('cognome_nome'):
+            '''set_trace()'''
+            '''print("Docente in valutazione:", docente, ", giro:", giro)'''
+            for journal in [journal_1_singoloAutore, journal_2_singoloAutore, journal_3_singoloAutore]:
+                if docente in docenti:
+                    for pubblicazione in journal.filter(relazionedocentepubblicazione__autore=docente):
+
+                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                            break
+
+                        if numero_coautori_possibili_pubblicazione[pubblicazione.pk] == 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente):
+                            relazione = RelazioneDocentePubblicazione.objects.get(
+                                pubblicazione=pubblicazione, autore=docente)
+                            relazione.scelta = 1
+                            relazione.save()
+
+                            progresso = 1
+
+                            numero_selezioni_docente[docente.pk] += 1
+                            if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                                docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                    docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                                progresso = 1
+                                break
+
+                if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                    docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                        docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+
+        # Selezione di pubblicazioni con autori multipli
+        if progresso == 0:
+            '''set_trace()'''
+            for journal in [journal_1, journal_2, journal_3]:
+                if docente in docenti:
+
+                    for pubblicazione in journal.filter(relazionedocentepubblicazione__autore=docente):
+
+                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                            break
+
+                        if numero_coautori_possibili_pubblicazione[pubblicazione.pk] == 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente):
+                            relazione = RelazioneDocentePubblicazione.objects.get(
+                                pubblicazione=pubblicazione, autore=docente)
+                            relazione.scelta = 1
+                            relazione.save()
+
+                            progresso = 1
+
+                            numero_selezioni_docente[docente.pk] += 1
+                            if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                                docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                    docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                                progresso = 1
+                                break
+
+                    if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                        docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                            docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+
+    print("LISTA DOCENTI: ")
+    for docente in docenti:
+        print(docente)
+
+    return redirect('assegnamento', valutazione)
+
+
+def azzera_assegnamento(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
+        pubblicazione__valutazione=valutazione)
+
+    for relazione in relazioni_docente_pubblicazione:
+        relazione.scelta = 0
+        relazione.save()
+
+    return redirect('assegnamento', valutazione)
+
+
+'''def assegnamento_algoritmo(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    numero_selezioni_valutazione = valutazione.numeroPubblicazioni
+    pubblicazioni = PubblicazionePresentata.objects.filter(valutazione=valutazione)
+    relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(pubblicazione__valutazione=valutazione)
+    docenti = Docente.objects.annotate(num_relazioni=Count('relazionedocentepubblicazione')).order_by('num_relazioni')
+
+    numero_selezioni_docente = {docente.pk: 0 for docente in docenti}
+
+    numero_coautori_possibili_pubblicazione = {}
+
+    for pubblicazione in pubblicazioni:
+        numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(pubblicazione, relazioni_docente_pubblicazione, docenti)
+
+    for docente in docenti:
+        for quartile in [0, 1, 2, 3, 4, 5]:
+            for pubblicazione in pubblicazioni.filter(miglior_quartile=quartile):
+                if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                    break
+
+                if numero_coautori_possibili_pubblicazione[pubblicazione.pk] == 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente):
+                    relazione = RelazioneDocentePubblicazione.objects.get(pubblicazione=pubblicazione, autore=docente)
+                    relazione.scelta = 1
+                    relazione.save()
+                    numero_selezioni_docente[docente.pk] += 1
+                    if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                        break
+
+    return redirect('assegnamento', valutazione)'''
+
+
+def salva_selezioni(request, valutazione_nome, docente_codice_fiscale):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
+
+    if request.method == 'POST':
+        pubblicazioni = request.POST.getlist('titolo_pubblicazione')
+        selezionati = request.POST.getlist('selezione_pubblicazione')
+
+        relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
+            autore=docente)
+
+        set_trace()
+        for pubblicazione_id, selezione in zip(pubblicazioni, selezionati):
+            relazione = relazioni_docente_pubblicazione.get(
+                pubblicazione__titolo=pubblicazione_id)
+            if selezione:
+                relazione.scelta = 1
+            else:
+                relazione.scelta = 0
+            relazione.save()
+
+    return redirect('assegnamento', valutazione)

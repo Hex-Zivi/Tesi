@@ -49,16 +49,16 @@
               <td style="vertical-align: top; text-align: left;">
                 <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                   {% csrf_token %}
-                <button type="submit">Modifica</button>
+                <button type="submit" class="btn">Modifica</button>
                 </form>
 
                 <form action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                   {% csrf_token %}
-                  <button type="submit">Cancella</button>
+                  <button type="submit" class="btn">Cancella</button>
                 </form>
                 <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
                   {% csrf_token %}
-                  <button type="submit">Assegna Pubblicazioni</button>
+                  <button type="submit" class="btn">Assegna Pubblicazioni</button>
                 </form>
               </td>
             </tr>

@@ -6,23 +6,32 @@ Vista pubblicazioni del docente
 <div class="main">
   <h1>Pubblicazioni di {{ docente.cognome_nome }} per {{ valutazione.nome }}, {{ valutazione.anno }}</h1>
   <div style="display: flex; padding-top: 40px;">
-    <form method="post">
+    <form action="{% url 'salva_selezioni' valutazione.nome docente_codice_fiscale %}" method="post" style="display: inline;">
       {% csrf_token %}
       <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
         <tr>
           <td style="vertical-align: top; text-align: left;"><b>Titolo</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Selezionato anche da:</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Coautori</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Selezionato anche da</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Quartile</b></td>
           <td style="vertical-align: top; text-align: left;"><b>Selezione</b></td>
         </tr>
         {% for pubblicazione in pubblicazioni_info %}
         <tr>
           <td>{{ pubblicazione.titolo }}</td>
+          <input type="hidden" name="titolo_pubblicazione[]" value="{{ pubblicazione.titolo }}">
           <td>
             {% for autore in pubblicazione.altri_autori %}
             {{ autore }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
           </td>
-          <td><input type="checkbox" name="selezione_pubblicazione" value="{{ pubblicazione.id }}" {% if pubblicazione.valore_scelta != 0 %}checked{% endif %}></td>
+          <td>
+            {% for autore in pubblicazione.altri_autori_scelta %}
+            {{ autore }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </td>
+          <td>{{ pubblicazione.quartile }}</td>
+          <td><input type="checkbox" name="selezione_pubblicazione[]" value="{{ pubblicazione.id }}" {% if pubblicazione.valore_scelta != 0 %}checked{% endif %}></td>
         </tr>
         {% endfor %}
       </table>
@@ -30,6 +39,7 @@ Vista pubblicazioni del docente
         <button type="submit" class="btn">Salva selezioni</button>
       </div>
     </form>
+    
   </div>
 </div>
 {% endblock %}
