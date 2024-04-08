@@ -6,7 +6,7 @@ Vista pubblicazioni del docente
 <div class="main">
   <h1>Pubblicazioni di {{ docente.cognome_nome }} per {{ valutazione.nome }}, {{ valutazione.anno }}</h1>
   <div style="display: flex; padding-top: 40px;">
-    <form action="{% url 'salva_selezioni' valutazione.nome docente_codice_fiscale %}" method="post" style="display: inline;">
+    <form id="selezioneForm" method="post" style="display: inline;" action="{% url 'salva_selezioni' valutazione.nome docente_codice_fiscale %}">
       {% csrf_token %}
       <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
         <tr>
@@ -36,12 +36,28 @@ Vista pubblicazioni del docente
         {% endfor %}
       </table>
       <div style="padding-left: 20px;">
-        <button type="submit" class="btn">Salva selezioni</button>
+        <button type="button" class="btn" onclick="salvaSelezioni()">Salva selezioni</button>
       </div>
     </form>
     
   </div>
 </div>
+
+<script>
+function salvaSelezioni() {
+    var form = document.getElementById("selezioneForm");
+    var checkboxes = form.querySelectorAll('input[name="selezione_pubblicazione[]"]');
+    checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            checkbox.value = 1;
+        } else {
+            checkbox.value = 0;
+        }
+    });
+    form.submit();
+}
+</script>
 {% endblock %}
+
 
 

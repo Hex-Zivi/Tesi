@@ -26,7 +26,7 @@
             </td>
           </tr>
 
-          <!--Riga di una valutazione-->
+          <!-- Riga di una valutazione -->
           {% for valutazione in valutazioni %}
             <tr>
               <td style="vertical-align: top; text-align: left;">
@@ -49,16 +49,17 @@
               <td style="vertical-align: top; text-align: left;">
                 <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                   {% csrf_token %}
-                <button type="submit" class="btn">Modifica</button>
+                  <button type="submit" class="btn">Modifica</button>
+                </form>
+
+                <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn">Assegna Pubblicazioni</button>
                 </form>
 
                 <form action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                   {% csrf_token %}
                   <button type="submit" class="btn">Cancella</button>
-                </form>
-                <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn">Assegna Pubblicazioni</button>
                 </form>
               </td>
             </tr>
@@ -69,7 +70,7 @@
 
     <!-- Sezione di caricamento dati -->
     <div style="flex: 1; padding: 20px;">
-      <!-- 
+      <!--  
       <h1>Caricamento</h1>
       <div class="main">
         <h1>Caricamento File CSV</h1>
@@ -87,14 +88,14 @@
             <br>
             <button class="btn" type="submit">Carica</button>
         </form>
-         -->
+          -->
 
       <h1>Crea Nuova Valutazione</h1>
       <form method="post" action="{% url 'crea_valutazione' %}">
         {% csrf_token %}
         <label for="nome">Nome:</label>
         <input type="text" name="nome" id="nome" required />
-        <br/>
+        <br />
         <label for="anno">Anno:</label>
         <input type="number" name="anno" id="anno" min="2000" max="9999" value="{{ current_year }}" required />
         <br />

@@ -304,7 +304,7 @@ def assegnamento_algoritmo(request, valutazione_nome):
                 if docente in docenti:
                     for pubblicazione in journal.filter(relazionedocentepubblicazione__autore=docente):
 
-                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                        if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
                             docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
                                 docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
                             pubblicazioni = pubblicazioni.exclude(
@@ -349,7 +349,7 @@ def assegnamento_algoritmo(request, valutazione_nome):
 
                     for pubblicazione in journal.filter(relazionedocentepubblicazione__autore=docente):
 
-                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                        if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
                             docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
                                 docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
                             break
@@ -423,21 +423,24 @@ def salva_selezioni(request, valutazione_nome, docente_codice_fiscale):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
 
+    #set_trace()
+
     if request.method == 'POST':
-        pubblicazioni = request.POST.getlist('titolo_pubblicazione')
-        selezionati = request.POST.getlist('selezione_pubblicazione')
+        titoli_pubblicazioni_selezionate = request.POST.getlist('titolo_pubblicazione[]')
+        selezioni_pubblicazioni = request.POST.getlist('selezione_pubblicazione[]')
 
         relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
-            autore=docente)
+            pubblicazione__valutazione=valutazione, autore=docente)
 
-        set_trace()
-        for pubblicazione_id, selezione in zip(pubblicazioni, selezionati):
-            relazione = relazioni_docente_pubblicazione.get(
-                pubblicazione__titolo=pubblicazione_id)
+        for titolo_pubblicazione, selezione in zip(titoli_pubblicazioni_selezionate, selezioni_pubblicazioni):
+            relazione = relazioni_docente_pubblicazione.get(pubblicazione__titolo=titolo_pubblicazione)
+
             if selezione:
                 relazione.scelta = 1
             else:
                 relazione.scelta = 0
+            
             relazione.save()
 
-    return redirect('assegnamento', valutazione)
+    return redirect('assegnamento', valutazione_nome)
+
