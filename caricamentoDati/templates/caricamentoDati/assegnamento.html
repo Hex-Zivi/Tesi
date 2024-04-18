@@ -23,6 +23,17 @@
           <button class="btn" type="submit">Azzera</button>
         </form>
       </div>
+        <div style="padding: 20px;">
+          <h2>Carica nuova pubblicazione</h2>
+  
+  
+          <form action="{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn">Aggiungi pubblicazione</button>
+          </form>
+  
+        </div>
+      </div>
 
 
 <!-- FORM PER L'AGGIUNTA DI UNA PUBBLICAZIONE

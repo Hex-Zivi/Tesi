@@ -9,7 +9,7 @@ from django.http import HttpResponse
 
 from .models import *
 from django.db.models import Count
-from django.shortcuts import render
+from .forms import *
 
 
 from pdb import set_trace
@@ -122,15 +122,12 @@ def crea_valutazione(request):
     if request.method == "POST":
         nome = request.POST.get("nome")
         anno = request.POST.get("anno")
+        numero_pubblicazioni = request.POST.get("numero_pubblicazioni")
 
         nuova_valutazione = Valutazione(
-            nome=nome, anno=anno, dataCaricamento=datetime.date.today(), status="Vuota")
+            nome=nome, anno=anno, dataCaricamento=datetime.date.today(), status="Vuota", numeroPubblicazioni=numero_pubblicazioni)
         nuova_valutazione.save()
 
-    return redirect('valutazioni')
-
-
-def cancella_valutazione_(request):
     return redirect('valutazioni')
 
 
@@ -140,19 +137,16 @@ def cancella_valutazione(request, valutazione_nome):
     return redirect('valutazioni')
 
 
-def modifica_valutazione_(request):
-    return redirect('valutazioni')
-
-
 def modifica_valutazione(request, valutazione_nome):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
-    context = {'valutazione': valutazione, 'pubblicazioni': PubblicazionePresentata.objects.filter(
-        valutazione=valutazione).order_by('titolo')}
+    form = FormAggiungiPubblicazione()
+
+    context = {
+        'valutazione': valutazione,
+        'pubblicazioni': PubblicazionePresentata.objects.filter(valutazione=valutazione).order_by('titolo'),
+        'form_aggiungi_pubblicazione': form,
+    }
     return render(request, 'caricamentoDati/modifica.html', context)
-
-
-def cancella_pubblicazioni_tot_(request):
-    return redirect('modifica_valutazione')
 
 
 def cancella_pubblicazioni_tot(request, valutazione_nome):
@@ -170,6 +164,87 @@ def cancella_pubblicazione_singola(request, pubblicazione_titolo, valutazione_no
     return redirect('modifica_valutazione', valutazione)
 
 
+# ==================== AGGIUNTA PUBBLICAZIONE ====================
+def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    if docente != 'admin':
+        docente = Docente.objects.get(codiceFiscale=docente)
+        form = FormAggiungiPubblicazione(initial={'autori': [docente.codiceFiscale]})
+        context = {
+        'valutazione': valutazione,
+        'caller': caller,
+        'docente': docente.codiceFiscale,
+        'form_aggiungi_pubblicazione': form,
+    }
+    else:
+        form = FormAggiungiPubblicazione()
+        context = {
+            'valutazione': valutazione,
+            'caller': caller,
+            'docente': docente,
+            'form_aggiungi_pubblicazione': form,
+        }
+    
+
+
+    return render(request, 'caricamentoDati/aggiungi_pubblicazione.html', context)
+
+
+def aggiungi_pubblicazione(request, valutazione_nome, caller, docente):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    if docente != 'admin':
+        docente = Docente.objects.get(codiceFiscale=docente)
+        form = FormAggiungiPubblicazione(initial={'autori': [docente.codiceFiscale]})
+    else:
+        form = FormAggiungiPubblicazione()
+
+    if request.method == 'POST':
+        form = FormAggiungiPubblicazione(request.POST)
+        if form.is_valid():
+            handle = form.cleaned_data['handle']
+            titolo = form.cleaned_data['titolo']
+            anno_pubblicazione = form.cleaned_data['anno_pubblicazione']
+            miglior_quartile = form.cleaned_data['miglior_quartile']
+            issn_isbn = form.cleaned_data['issn_isbn']
+            doi = form.cleaned_data['doi']
+            tipologia_collezione = form.cleaned_data['tipologia_collezione']
+            titolo_rivista_atti = form.cleaned_data['titolo_rivista_atti']
+            indicizzato_scopus = form.cleaned_data['indicizzato_scopus']
+            numero_coautori_dip = len(form.cleaned_data['autori'])
+
+            nuova_pubblicazione = PubblicazionePresentata(handle=handle, valutazione=valutazione, titolo=titolo, anno_pubblicazione=anno_pubblicazione, miglior_quartile=miglior_quartile,
+                                                          issn_isbn=issn_isbn, doi=doi, tipologia_collezione=tipologia_collezione, titolo_rivista_atti=titolo_rivista_atti, indicizzato_scopus=indicizzato_scopus,
+                                                          num_coautori_dip=numero_coautori_dip)
+            nuova_pubblicazione.save()
+
+            for docente in form.cleaned_data['autori']:
+                nuova_relazione = RelazioneDocentePubblicazione(
+                    autore=docente, pubblicazione=nuova_pubblicazione)
+                nuova_relazione.save()
+
+            if caller == 'modifica':
+                return redirect('modifica_valutazione', valutazione)
+            
+            elif caller == 'assegnamento':
+                return redirect('assegnamento', valutazione)
+            
+            elif caller == 'docente':
+                return redirect('docente_pubblicazioni', valutazione.nome, docente.codiceFiscale)
+
+
+        else:
+            form = FormAggiungiPubblicazione(request.POST)
+
+    context = {
+        'valutazione': valutazione,
+        'caller': caller,
+        'docente': docente,
+        'form_aggiungi_pubblicazione': form,
+    }
+    return render(request, 'caricamentoDati/aggiungi_pubblicazione.html', context)
+
+
+# ===================== ASSEGNAMENTO ====================
 def assegnamento(request, valutazione_nome):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
@@ -272,7 +347,8 @@ def assegnamento_algoritmo(request, valutazione_nome):
 
     numero_selezioni_docente = {docente.pk: 0 for docente in docenti}
     for docente in docenti:
-        numero_selezioni_docente[docente.pk] = len(relazioni_docente_pubblicazione.filter(autore=docente, scelta=1))
+        numero_selezioni_docente[docente.pk] = len(
+            relazioni_docente_pubblicazione.filter(autore=docente, scelta=1))
 
     numero_coautori_possibili_pubblicazione = {}
 
@@ -373,6 +449,9 @@ def assegnamento_algoritmo(request, valutazione_nome):
     for docente in docenti:
         print(docente)
 
+    valutazione.status = "Assegnamento calcolato"
+    valutazione.save()
+
     return redirect('assegnamento', valutazione)
 
 
@@ -384,6 +463,9 @@ def azzera_assegnamento(request, valutazione_nome):
     for relazione in relazioni_docente_pubblicazione:
         relazione.scelta = 0
         relazione.save()
+
+    valutazione.status = "Pubblicazioni caricate"
+    valutazione.save()
 
     return redirect('assegnamento', valutazione)
 
@@ -423,24 +505,26 @@ def salva_selezioni(request, valutazione_nome, docente_codice_fiscale):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
 
-    #set_trace()
+    # set_trace()
 
     if request.method == 'POST':
-        titoli_pubblicazioni_selezionate = request.POST.getlist('titolo_pubblicazione[]')
-        selezioni_pubblicazioni = request.POST.getlist('selezione_pubblicazione[]')
+        titoli_pubblicazioni_selezionate = request.POST.getlist(
+            'titolo_pubblicazione[]')
+        selezioni_pubblicazioni = request.POST.getlist(
+            'selezione_pubblicazione[]')
 
         relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
             pubblicazione__valutazione=valutazione, autore=docente)
 
         for titolo_pubblicazione, selezione in zip(titoli_pubblicazioni_selezionate, selezioni_pubblicazioni):
-            relazione = relazioni_docente_pubblicazione.get(pubblicazione__titolo=titolo_pubblicazione)
+            relazione = relazioni_docente_pubblicazione.get(
+                pubblicazione__titolo=titolo_pubblicazione)
 
             if selezione:
                 relazione.scelta = 1
             else:
                 relazione.scelta = 0
-            
+
             relazione.save()
 
     return redirect('assegnamento', valutazione_nome)
-

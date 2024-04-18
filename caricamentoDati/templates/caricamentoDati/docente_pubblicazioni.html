@@ -5,6 +5,18 @@ Vista pubblicazioni del docente
 {% block content %}
 <div class="main">
   <h1>Pubblicazioni di {{ docente.cognome_nome }} per {{ valutazione.nome }}, {{ valutazione.anno }}</h1>
+  <br/>
+  <div style="padding: 20px;">
+    <h2>Carica nuova pubblicazione</h2>
+
+
+    <form action="{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='docente' docente=docente.codiceFiscale %}" method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn">Aggiungi pubblicazione</button>
+    </form>
+
+  </div>
+</div>
   <div style="display: flex; padding-top: 40px;">
     <form id="selezioneForm" method="post" style="display: inline;" action="{% url 'salva_selezioni' valutazione.nome docente_codice_fiscale %}">
       {% csrf_token %}

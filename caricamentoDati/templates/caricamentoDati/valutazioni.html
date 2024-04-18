@@ -61,6 +61,7 @@
                   {% csrf_token %}
                   <button type="submit" class="btn">Cancella</button>
                 </form>
+                
               </td>
             </tr>
           {% endfor %}
@@ -93,11 +94,16 @@
       <h1>Crea Nuova Valutazione</h1>
       <form method="post" action="{% url 'crea_valutazione' %}">
         {% csrf_token %}
-        <label for="nome">Nome:</label>
+        
+        <label for="nome" >Nome:</label>
         <input type="text" name="nome" id="nome" required />
         <br />
         <label for="anno">Anno:</label>
         <input type="number" name="anno" id="anno" min="2000" max="9999" value="{{ current_year }}" required />
+        <br />
+        <br />
+        <label for="numero_pubblicazioni">Numero di Pubblicazioni da assegnare:</label>
+        <input type="number" name="numero_pubblicazioni" id="numero_pubblicazioni" min="0" max="999" required />
         <br />
         <button class="btn" type="submit">Crea Valutazione</button>
       </form>

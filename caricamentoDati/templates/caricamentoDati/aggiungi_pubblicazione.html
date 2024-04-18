@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}
+  Assegnamento delle Pubblicazioni
+{% endblock %}
+{% block content %}
+  <div class="main">
+    <h1>Crea nuova Pubblicazione per {{ valutazione.nome }}</h1>
+    <div style="padding: 20px;">
+        <h2>Aggiungi pubblicazione</h2>
+        <form method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome caller=caller docente=docente.codiceFiscale%}">
+          {% csrf_token %}
+          {{ form_aggiungi_pubblicazione.as_p }}
+          <button class="btn" type="submit">Aggiungi</button>
+        </form>
+      </div>
+  </div>
+{% endblock %}

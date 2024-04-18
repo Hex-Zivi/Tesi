@@ -42,7 +42,14 @@
           <li>
             <a href="{% url 'valutazioni' %}">Valutazioni</a>
           </li>
-          <!-- Aggiungi altri link al menu se necessario -->
+          {% if valutazione.nome %}
+        <li>
+          <a href="{% url 'modifica_valutazione' valutazione.nome %}">Modifica valutazione</a>
+        </li>
+        <li>
+          <a href="{% url 'assegnamento' valutazione.nome %}">Assegnamento valutazione</a>
+        </li>
+      {% endif %}
         </ul>
       </div>
     </div>
