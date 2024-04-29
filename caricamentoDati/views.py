@@ -10,6 +10,11 @@ from django.http import HttpResponse
 from .models import *
 from django.db.models import Count
 from .forms import *
+from django.http import JsonResponse
+
+import requests
+from bs4 import BeautifulSoup
+import openpyxl
 
 
 from pdb import set_trace
@@ -44,7 +49,7 @@ def caricamento(request):
 
 def caricamento_con_file(request, filename, valutazione):
     if request.method == 'POST':
-        csv_file = request.FILES.get('filename')
+        file = request.FILES.get('filename')
         valutazione = Valutazione.objects.get(nome=valutazione)
         elenco = []
         intestazione = ['anno_di_pubblicazione', 'autore', 'codice_fiscale', 'handle', 'doi', 'titolo',
@@ -52,18 +57,27 @@ def caricamento_con_file(request, filename, valutazione):
                         'issn_o_isbn', 'titolo_rivista_o_atti', 'indicizzato_scopus', 'miglior_quartile_scopus',
                         'num_coautori_interni_dip', 'codice_fiscale']
         riferimento = []
-        if csv_file:
-            csv_data = csv.reader(csv_file.read().decode(
-                'utf-8').splitlines(), delimiter=',')
-            for valore in csv_data:
-                elenco.append(valore)
+        if file:
+            # Determina il tipo di file e leggi i dati appropriati
+            if filename.endswith('.csv'):
+                csv_data = csv.reader(file.read().decode(
+                    'utf-8').splitlines(), delimiter=',')
+                for valore in csv_data:
+                    elenco.append(valore)
+            elif filename.endswith('.xlsx'):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                for row in sheet.iter_rows(values_only=True):
+                    elenco.append(row)
+            else:
+                # Gestisci il caso in cui il tipo di file non è supportato
+                return HttpResponse("Il tipo di file non è supportato.")
 
             for element in elenco[5]:
                 for titolo in intestazione:
                     if element.lower() == titolo:
                         riferimento.append(intestazione.index(titolo))
 
-            n = 100
             with transaction.atomic():
                 for riga in elenco[6:]:
                     anno_pubblicazione = riga[0]
@@ -91,7 +105,6 @@ def caricamento_con_file(request, filename, valutazione):
                     if not Docente.objects.filter(codiceFiscale=codice_fiscale).exists():
                         Docente(codiceFiscale=codice_fiscale,
                                 cognome_nome=autore).save()
-                        n = n + 1
 
                     if not PubblicazionePresentata.objects.filter(handle=handle).exists():
                         PubblicazionePresentata(handle=handle,
@@ -169,13 +182,14 @@ def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     if docente != 'admin':
         docente = Docente.objects.get(codiceFiscale=docente)
-        form = FormAggiungiPubblicazione(initial={'autori': [docente.codiceFiscale]})
+        form = FormAggiungiPubblicazione(
+            initial={'autori': [docente.codiceFiscale]})
         context = {
-        'valutazione': valutazione,
-        'caller': caller,
-        'docente': docente.codiceFiscale,
-        'form_aggiungi_pubblicazione': form,
-    }
+            'valutazione': valutazione,
+            'caller': caller,
+            'docente': docente.codiceFiscale,
+            'form_aggiungi_pubblicazione': form,
+        }
     else:
         form = FormAggiungiPubblicazione()
         context = {
@@ -184,17 +198,16 @@ def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
             'docente': docente,
             'form_aggiungi_pubblicazione': form,
         }
-    
-
 
     return render(request, 'caricamentoDati/aggiungi_pubblicazione.html', context)
 
 
-def aggiungi_pubblicazione(request, valutazione_nome, caller, docente):
+def aggiungi_pubblicazione(request, valutazione_nome, docente):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     if docente != 'admin':
         docente = Docente.objects.get(codiceFiscale=docente)
-        form = FormAggiungiPubblicazione(initial={'autori': [docente.codiceFiscale]})
+        form = FormAggiungiPubblicazione(
+            initial={'autori': [docente.codiceFiscale]})
     else:
         form = FormAggiungiPubblicazione()
 
@@ -222,22 +235,13 @@ def aggiungi_pubblicazione(request, valutazione_nome, caller, docente):
                     autore=docente, pubblicazione=nuova_pubblicazione)
                 nuova_relazione.save()
 
-            if caller == 'modifica':
-                return redirect('modifica_valutazione', valutazione)
-            
-            elif caller == 'assegnamento':
-                return redirect('assegnamento', valutazione)
-            
-            elif caller == 'docente':
-                return redirect('docente_pubblicazioni', valutazione.nome, docente.codiceFiscale)
-
+                return HttpResponse('<script>window.close()</script>')
 
         else:
             form = FormAggiungiPubblicazione(request.POST)
 
     context = {
         'valutazione': valutazione,
-        'caller': caller,
         'docente': docente,
         'form_aggiungi_pubblicazione': form,
     }
@@ -344,6 +348,7 @@ def assegnamento_algoritmo(request, valutazione_nome):
         pubblicazione__valutazione=valutazione)
     docenti = Docente.objects.annotate(num_relazioni=Count(
         'relazionedocentepubblicazione')).order_by('num_relazioni')
+    riviste_ecc = RivistaEccellente.objects.filter(valutazione=valutazione)
 
     numero_selezioni_docente = {docente.pk: 0 for docente in docenti}
     for docente in docenti:
@@ -358,6 +363,27 @@ def assegnamento_algoritmo(request, valutazione_nome):
 
     progresso = 1
     giro = 0
+
+    for rivista in riviste_ecc:
+        pubblicazione = pubblicazioni.filter(
+            tipologia_collezione__iexact=rivista)
+        if pubblicazione:
+            if pubblicazione.num_coautori_dip == 1:
+                relazione = RelazioneDocentePubblicazione.objects.get(
+                    pubblicazione__tipologia_collezione=rivista)
+                docente = docenti.get(
+                    codiceFiscale=relazione.autore__codiceFiscale)
+                relazione.scelta = 1
+                relazione.save()
+
+                numero_selezioni_docente[docente.pk] += 1
+                if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                    docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                        docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                    progresso = 1
+                    pubblicazioni = pubblicazioni.exclude(
+                        relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+                break
 
     while progresso == 1:
         journal_1_singoloAutore = pubblicazioni.filter(
@@ -528,3 +554,39 @@ def salva_selezioni(request, valutazione_nome, docente_codice_fiscale):
             relazione.save()
 
     return redirect('assegnamento', valutazione_nome)
+
+
+def riviste_eccellenti(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    riviste = RivistaEccellente.objects.filter(valutazione=valutazione)
+    context = {
+        'valutazione': valutazione,
+        'riviste': riviste
+    }
+    return render(request, 'caricamentoDati/riviste_eccellenti.html', context)
+
+
+def carica_riviste(request, valutazione_nome):
+    if request.method == 'POST':
+        xlsx_file = request.FILES.get('filename')
+        valutazione = Valutazione.objects.get(nome=valutazione_nome)
+        elenco = []
+        intestazione = ['titolo', 'link']
+        riferimento = []
+        if xlsx_file:
+            workbook = openpyxl.load_workbook(xlsx_file)
+            sheet = workbook.active
+            for row in sheet.iter_rows(values_only=True):
+                elenco.append(row)
+
+            with transaction.atomic():
+                for riga in elenco[1:]:
+                    nome = riga[0]
+                    link = riga[1]
+
+                    if not RivistaEccellente.objects.filter(valutazione=valutazione, nome=nome).exists():
+
+                        RivistaEccellente.objects.create(
+                            valutazione=valutazione, nome=nome, link=link)
+
+    return redirect('riviste_eccellenti', valutazione)

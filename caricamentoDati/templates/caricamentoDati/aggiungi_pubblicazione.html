@@ -7,11 +7,44 @@
     <h1>Crea nuova Pubblicazione per {{ valutazione.nome }}</h1>
     <div style="padding: 20px;">
         <h2>Aggiungi pubblicazione</h2>
-        <form method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome caller=caller docente=docente.codiceFiscale%}">
+        <form method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome caller=caller docente=docente%}">
           {% csrf_token %}
           {{ form_aggiungi_pubblicazione.as_p }}
           <button class="btn" type="submit">Aggiungi</button>
         </form>
       </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.querySelector('#aggiungi_pubblicazione_form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Previeni il comportamento predefinito della form
+
+            // Effettua una richiesta AJAX per aggiungere la pubblicazione
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Se l'aggiunta della pubblicazione è avvenuta con successo, chiudi la finestra corrente
+                    window.close();
+                } else {
+                    // Gestisci eventuali errori o altre situazioni qui
+                    console.error('Errore durante l\'aggiunta della pubblicazione');
+                }
+            })
+            .catch(error => {
+                console.error('Si è verificato un errore:', error);
+            });
+        });
+    });
+</script>
+
+
 {% endblock %}

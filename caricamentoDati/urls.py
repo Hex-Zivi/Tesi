@@ -24,7 +24,7 @@ urlpatterns = [
     re_path('^aggiungi_pubblicazione_pagina/(?P<valutazione_nome>.*)/(?P<caller>.*)/(?P<docente>.*)/$',
             views.aggiungi_pubblicazione_pagina, name="aggiungi_pubblicazione_pagina"),
 
-    re_path('^aggiungi_pubblicazione/(?P<valutazione_nome>.*)/(?P<caller>.*)/(?P<docente>.*)/$',
+    re_path('^aggiungi_pubblicazione/(?P<valutazione_nome>.*)/(?P<docente>.*)/$',
             views.aggiungi_pubblicazione, name="aggiungi_pubblicazione"),
 
     re_path('^cancella_pubblicazioni_tot/(?P<valutazione_nome>.*)/$', views.cancella_pubblicazioni_tot,
@@ -47,5 +47,11 @@ urlpatterns = [
 
     re_path('^salva_selezioni/(?P<valutazione_nome>.*)/(?P<docente_codice_fiscale>.*)/$',
             views.salva_selezioni, name="salva_selezioni"),
+
+    re_path('^riviste_eccellenti/(?P<valutazione_nome>.*)/$',
+            views.riviste_eccellenti, name="riviste_eccellenti"),
+
+    re_path('^carica_riviste/(?P<valutazione_nome>.*)/$',
+            views.carica_riviste, name="carica_riviste"),
 
 ]

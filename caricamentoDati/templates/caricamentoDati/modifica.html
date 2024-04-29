@@ -20,23 +20,37 @@
           {% csrf_token %}
           <label for="filename">Seleziona un file CSV:</label>
           <input type="file" name="filename" id="filename" />
-          <br />
+          <br/>
           <button class="btn" type="submit">Carica</button>
         </form>
       </div>
 
       <div style="padding: 20px;">
         <h2>Carica nuova pubblicazione</h2>
+    
+        <button onclick="openPopup()" class="btn">Aggiungi pubblicazione</button>
+    
+        <script>
+            function openPopup() {
+                var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}";
+                window.open(url, "popupWindow", "width=1800,height=800,scrollbars=yes");
+            }
+        </script>
+    </div>
+    
+
+      <div style="padding: 20px;">
+        <h2>Riviste eccellenti</h2>
 
 
-        <form action="{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}" method="post">
+        <form action="{% url 'riviste_eccellenti' valutazione_nome=valutazione.nome %}" method="post">
           {% csrf_token %}
-          <button type="submit" class="btn">Aggiungi pubblicazione</button>
+          <button type="submit" class="btn">Modifica</button>
         </form>
 
       </div>
-    </div>
 
+    </div>
     <div style="padding-top: 80px;">
       {% if pubblicazioni %}
         <h2>Pubblicazioni</h2>

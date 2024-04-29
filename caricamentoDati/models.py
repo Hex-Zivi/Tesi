@@ -49,8 +49,14 @@ class Docente(models.Model):
 
 
 class RivistaEccellente(models.Model):
-    isbn = models.CharField(max_length=30, primary_key=True)
+    class Meta:
+        unique_together = (('valutazione', 'nome'),)
+
+    valutazione = models.ForeignKey(
+        Valutazione, on_delete=models.CASCADE, default='_')
+    isbn = models.CharField(max_length=30, null=True, blank=True)
     nome = models.CharField(max_length=60)
+    link = models.CharField(max_length=200, blank=False, null=False, default='_')
 
     def __str__(self):
         return '{} - {}'.format(self.isbn, self.nome)

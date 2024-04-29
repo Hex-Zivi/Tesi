@@ -9,13 +9,15 @@ Vista pubblicazioni del docente
   <div style="padding: 20px;">
     <h2>Carica nuova pubblicazione</h2>
 
+    <button onclick="openPopup()" class="btn">Aggiungi pubblicazione</button>
 
-    <form action="{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='docente' docente=docente.codiceFiscale %}" method="post">
-      {% csrf_token %}
-      <button type="submit" class="btn">Aggiungi pubblicazione</button>
-    </form>
-
-  </div>
+    <script>
+        function openPopup() {
+            var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}";
+            window.open(url, "popupWindow", "width=1800,height=800,scrollbars=yes");
+        }
+    </script>
+</div>
 </div>
   <div style="display: flex; padding-top: 40px;">
     <form id="selezioneForm" method="post" style="display: inline;" action="{% url 'salva_selezioni' valutazione.nome docente_codice_fiscale %}">

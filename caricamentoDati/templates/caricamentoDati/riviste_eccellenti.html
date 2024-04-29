@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}
+Riviste Eccellenti
+{% endblock %}
+{% block content %}
+<div class="main">
+        <h1>Riviste eccellenti per {{ valutazione.nome }}</h1>
+        <div style="display: flex;">
+          <div style="padding: 20px;">
+            <h2>Cancella riviste</h2>
+            <form method="post" action="{% url 'cancella_pubblicazioni_tot' valutazione.nome %}">
+              {% csrf_token %}
+    
+              <button class="btn" type="submit">Cancella</button>
+            </form>
+          </div>
+          <div style="padding: 20px;">
+            <h2>Carica Riviste</h2>
+            <form method="post" enctype="multipart/form-data" action="{% url 'carica_riviste' valutazione_nome=valutazione.nome %}">
+              {% csrf_token %}
+              <label for="filename">Seleziona un file XLSX:</label>
+              <input type="file" name="filename" id="filename" />
+              <br/>
+              <button class="btn" type="submit">Carica</button>
+            </form>
+          </div>
+    
+          <div style="padding: 20px;">
+            <h2>Aggiungi Rivista</h2>
+        
+            <button class="btn">Aggiungi</button>
+          </div>
+        </div>
+
+        <div style="padding-top: 80px;">
+                {% if riviste %}
+                  <h2>Pubblicazioni</h2>
+                  <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                    <tr>
+                      <td style="vertical-align: top; text-align: left;">
+                        <b>Titolo</b>
+                      </td>
+                      <td style="vertical-align: top; text-align: left;">
+                        <b>link</b>
+                      </td>
+                    </tr>
+                    {% for rivista in riviste %}
+                      <tr>
+                        <td>{{ rivista.nome }}</td>
+                        <td><a href="{{ rivista.link }}">{{ rivista.link }}</a></td>
+                      </tr>
+                    {% endfor %}
+                  </table>
+                {% else %}
+                  <p>Non ci sono pubblicazioni disponibili.</p>
+                {% endif %}
+              </div>
+</div>
+{% endblock %}
