@@ -16,8 +16,28 @@ import requests
 from bs4 import BeautifulSoup
 import openpyxl
 
+from django.contrib.auth import authenticate
+from django_auth_ldap.backend import LDAPBackend # Greyed out
+
 
 from pdb import set_trace
+
+
+def login(request):
+    if request.method == 'POST':
+        # Get info from POST request
+        usr = request.POST['username']
+        pas = request.POST['password']
+        user = authenticate(username=usr, password=pas)
+        print(user.codice_fiscale)
+
+        if user is not None:
+            return render(request, 'dashboard/index.html', {})
+        else:
+            print("The username and password were incorrect.")
+            return render(request, 'dashboard/error.html', {})
+    elif request.method == 'GET':
+        return render(request, 'login.html', {})
 
 
 def valutazioni(request):
@@ -88,6 +108,7 @@ def caricamento_con_file(request, filename, valutazione):
                     tipologia_collezione = riga[5]
                     issn_isbn = riga[6]
                     titolo_rivista_atti = riga[7]
+                    titolo_rivista_atti = titolo_rivista_atti.upper()
                     indicizzato_scopus = riga[8].lower()
                     if indicizzato_scopus in ['vero', '1', 'true']:
                         indicizzato_scopus = True
@@ -365,14 +386,18 @@ def assegnamento_algoritmo(request, valutazione_nome):
     giro = 0
 
     for rivista in riviste_ecc:
-        pubblicazione = pubblicazioni.filter(
-            tipologia_collezione__iexact=rivista)
-        if pubblicazione:
+        print("Per la rivista:" + rivista.nome)
+        pubblicazioni_rivista = pubblicazioni.filter(
+            titolo_rivista_atti=rivista.nome)
+        for pubblicazione in pubblicazioni_rivista:
+            print("pubblicazione:" + pubblicazione.titolo)
+
             if pubblicazione.num_coautori_dip == 1:
-                relazione = RelazioneDocentePubblicazione.objects.get(
-                    pubblicazione__tipologia_collezione=rivista)
+                relazione = RelazioneDocentePubblicazione.objects.filter(
+                    pubblicazione__titolo=pubblicazione.titolo)
+
                 docente = docenti.get(
-                    codiceFiscale=relazione.autore__codiceFiscale)
+                    codiceFiscale=relazione.autore.codiceFiscale)
                 relazione.scelta = 1
                 relazione.save()
 
@@ -383,7 +408,6 @@ def assegnamento_algoritmo(request, valutazione_nome):
                     progresso = 1
                     pubblicazioni = pubblicazioni.exclude(
                         relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
-                break
 
     while progresso == 1:
         journal_1_singoloAutore = pubblicazioni.filter(
@@ -582,6 +606,7 @@ def carica_riviste(request, valutazione_nome):
             with transaction.atomic():
                 for riga in elenco[1:]:
                     nome = riga[0]
+                    nome = nome.upper()
                     link = riga[1]
 
                     if not RivistaEccellente.objects.filter(valutazione=valutazione, nome=nome).exists():

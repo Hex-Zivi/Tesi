@@ -13,6 +13,11 @@ import os
 
 from pathlib import Path
 
+import ldap
+from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'caricamentoDati',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -119,6 +126,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
@@ -133,3 +141,36 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# LDAP config
+
+# Baseline configuration.
+AUTH_LDAP_SERVER_URI = 'ldap://localhost'
+LDAP_DOMAIN = "dc=univr,dc=it"
+
+AUTH_LDAP_BIND_DN = f'cn=admin,{LDAP_DOMAIN}'
+AUTH_LDAP_BIND_PASSWORD = 'test1234'
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    f'{LDAP_DOMAIN}',
+    ldap.SCOPE_SUBTREE,
+    '(uid=%(user)s)',
+)
+
+
+AUTH_LDAP_USER_ATTR_MAP = {
+    'first_name': 'givenName',
+    'last_name': 'sn',
+    'codice_fiscale': 'univrCF',
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+}
+
+AUTHENTICATION_BACKENDS = (
+    "django_auth_ldap.backend.LDAPBackend",
+    "django.contrib.auth.backends.ModelBackend",
+)
