@@ -30,7 +30,7 @@
     
         <script>
             function openPopup() {
-                var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}";
+                var url = "{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome docente='admin' %}";
                 window.open(url, "popupWindow", "width=1800,height=800,scrollbars=yes");
             }
         </script>

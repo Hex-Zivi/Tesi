@@ -130,7 +130,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    #os.path.join(BASE_DIR, 'static'),
     os.path.join(BASE_DIR, 'caricamentoDati/static'),  # Esempio per l'app mio_app
 
 
@@ -162,6 +162,7 @@ AUTH_LDAP_USER_ATTR_MAP = {
     'first_name': 'givenName',
     'last_name': 'sn',
     'codice_fiscale': 'univrCF',
+    'ruolo': 'objectclass'
 }
 
 REST_FRAMEWORK = {

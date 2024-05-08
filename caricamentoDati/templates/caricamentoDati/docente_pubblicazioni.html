@@ -58,19 +58,34 @@ Vista pubblicazioni del docente
 </div>
 
 <script>
-function salvaSelezioni() {
-    var form = document.getElementById("selezioneForm");
-    var checkboxes = form.querySelectorAll('input[name="selezione_pubblicazione[]"]');
-    checkboxes.forEach(function(checkbox) {
-        if (checkbox.checked) {
-            checkbox.value = 1;
-        } else {
-            checkbox.value = 0;
-        }
-    });
-    form.submit();
-}
-</script>
+  function salvaSelezioni() {
+      var form = document.getElementById("selezioneForm");
+      var titoliPubblicazioniSelezionate = [];
+  
+      var checkboxes = form.querySelectorAll('input[name="selezione_pubblicazione[]"]');
+      checkboxes.forEach(function(checkbox) {
+          if (checkbox.checked) {
+              // Se la checkbox è selezionata, aggiungi il titolo alla lista
+              var titolo = checkbox.parentNode.parentNode.querySelector('td:first-child').textContent;
+              titoliPubblicazioniSelezionate.push(titolo);
+          }
+      });
+  
+      // Aggiungi i titoli selezionati come campo nascosto nel form
+      titoliPubblicazioniSelezionate.forEach(function(titolo) {
+          var inputTitolo = document.createElement("input");
+          inputTitolo.setAttribute("type", "hidden");
+          inputTitolo.setAttribute("name", "titoli_pubblicazione[]");
+          inputTitolo.setAttribute("value", titolo);
+          form.appendChild(inputTitolo);
+      });
+  
+      // Invia il form
+      form.submit();
+  }
+  </script>
+  
+  
 {% endblock %}
 
 

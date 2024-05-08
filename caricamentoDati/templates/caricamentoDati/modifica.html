@@ -43,10 +43,16 @@
         <h2>Riviste eccellenti</h2>
 
 
-        <form action="{% url 'riviste_eccellenti' valutazione_nome=valutazione.nome %}" method="post">
-          {% csrf_token %}
-          <button type="submit" class="btn">Modifica</button>
-        </form>
+        
+          
+          <button onclick="openPopup2()" class="btn">Modifica riviste eccellenti</button>
+        
+        <script>
+          function openPopup2() {
+              var url = "{% url 'riviste_eccellenti' valutazione_nome=valutazione.nome %}";
+              window.open(url, "popupWindow", "width=1800,height=800,scrollbars=yes");
+          }
+      </script>
 
       </div>
 
