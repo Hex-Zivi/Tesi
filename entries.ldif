@@ -1997,7 +1997,7 @@ objectclass: univrUtente
 sn: Smith
 uid: rg302msh
 uidnumber: 1098
-univrCF : 8838104690331265
+univrCF : 9999999999999999
 univrannoaccademico: 2023/24
 univridcorso: L31
 univrmatricolautente: VR680338
@@ -2018,7 +2018,7 @@ objectclass: univrUtente
 sn: Werner
 uid: wb004xvo
 uidnumber: 1099
-univrCF : 5795938749188796
+univrCF : 1223334444555556
 univrannoaccademico: 2023/24
 univridcorso: L31
 univrmatricolautente: VR855354
@@ -2026,3 +2026,24 @@ univrAnnoIscrizione: 3
 userpassword: {MD5}Ftek/KdELdo62TyacmWX5A==
 
 
+
+# Entry 101: cn=id105hrw,dc=univr,dc=it
+dn: cn=id105hrw,dc=univr,dc=it
+cn: id105hrw
+cn: admin
+gidnumber: 0
+givenname: Andrea
+homedirectory: /home/users/id105hrw
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+objectclass: univrUtente
+sn: Ziviani
+uid: id105hrw
+uidnumber: 1101
+univrCF : zvnndr98m11i775m
+univrannoaccademico: 2023/24
+univridcorso: L31
+univrmatricolautente: VR476816
+univrAnnoIscrizione: 3
+userpassword: {MD5}Ftek/KdELdo62TyacmWX5A==

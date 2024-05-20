@@ -20,11 +20,13 @@ from FUR import views
 from caricamentoDati import views as views_caricamentoDati
 
 urlpatterns = [
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('FUR/', views.FUR, name='FUR'),
-    path('valutazioni/', include('caricamentoDati.urls')),
+    path('', include('caricamentoDati.urls')),
     path('accounts/login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    
     #path('caricamento/', include('caricamentoDati.urls')),
     #path('caricamento_con_file/', include('caricamentoDati.urls')),
     #path('caricamento/', views_caricamentoDati.caricamento, name='caricamento'),

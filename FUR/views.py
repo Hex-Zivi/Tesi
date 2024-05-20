@@ -36,12 +36,18 @@ def login_view(request):
         ldap_backend = LDAPBackend()
         user = ldap_backend.authenticate(request, username=usr, password=pas)
         request.user
-        print(user.codice_fiscale)
+        print(user)
+
+        # Da controllare
+        user_attrs = user.ldap_user._user_attrs._data['objectclass']
+        user.ruolo = 'admin' if 'univrUtente' in user_attrs else 'user'
+        # // Da controllare
+
 
         if user is not None:
             user.backend = 'django_auth_ldap.backend.LDAPBackend'
             login(request, user)
-            print(user.codice_fiscale, user.ruolo, user.first_name, user.last_name)
+            print(user.codice_fiscale, user.ruolo, user.first_name, user.last_name, user.uid)
             print("Credenziali corrette")
             return redirect('valutazioni')
         else:

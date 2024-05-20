@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'caricamentoDati',
+    'django.contrib.admindocs', # admindocs, opzionale
 ]
 
 
@@ -162,7 +163,8 @@ AUTH_LDAP_USER_ATTR_MAP = {
     'first_name': 'givenName',
     'last_name': 'sn',
     'codice_fiscale': 'univrCF',
-    'ruolo': 'objectclass'
+    'ruolo': 'objectclass',
+    'uid': 'uidnumber'
 }
 
 REST_FRAMEWORK = {

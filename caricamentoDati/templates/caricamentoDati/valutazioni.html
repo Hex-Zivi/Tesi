@@ -47,21 +47,27 @@
                 <br />
               </td>
               <td style="vertical-align: top; text-align: left;">
-                <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn">Modifica</button>
-                </form>
+                {% if user.is_staff %}
+                  <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Modifica</button>
+                  </form>
 
-                <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn">Assegna Pubblicazioni</button>
-                </form>
+                  <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Assegna Pubblicazioni</button>
+                  </form>
 
-                <form action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn">Cancella</button>
-                </form>
-                
+                  <form action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Cancella</button>
+                  </form>
+                {% else %}
+                  <form action="{% url 'docente_pubblicazioni' valutazione.nome user.codice_fiscale %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Assegna Pubblicazioni</button>
+                  </form>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}
@@ -71,7 +77,7 @@
 
     <!-- Sezione di caricamento dati -->
     <div style="flex: 1; padding: 20px;">
-      <!--  
+      <!--   
       <h1>Caricamento</h1>
       <div class="main">
         <h1>Caricamento File CSV</h1>
@@ -89,13 +95,13 @@
             <br>
             <button class="btn" type="submit">Carica</button>
         </form>
-          -->
+           -->
 
       <h1>Crea Nuova Valutazione</h1>
       <form method="post" action="{% url 'crea_valutazione' %}">
         {% csrf_token %}
-        
-        <label for="nome" >Nome:</label>
+
+        <label for="nome">Nome:</label>
         <input type="text" name="nome" id="nome" required />
         <br />
         <label for="anno">Anno:</label>
