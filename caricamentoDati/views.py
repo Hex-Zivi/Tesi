@@ -10,54 +10,43 @@ from django.http import HttpResponse
 from .models import *
 from django.db.models import Count
 from .forms import *
-from django.http import JsonResponse
 
-import requests
-from bs4 import BeautifulSoup
 import openpyxl
 
-from django.contrib.auth import authenticate
-from django_auth_ldap.backend import LDAPBackend # Greyed out
+
+from django_auth_ldap.backend import LDAPBackend  # Greyed out
 from django.contrib.auth.decorators import login_required
 
 
 from pdb import set_trace
 from django.contrib.auth.decorators import user_passes_test
 
+from django.contrib.auth import authenticate, login, logout
+
+
 def is_admin(user):
-    return user.is_authenticated and user.is_staff  # Esempio: verifica se l'utente è autenticato e ha il ruolo di amministratore
+    # Esempio: verifica se l'utente è autenticato e ha il ruolo di amministratore
+    return user.is_authenticated and user.is_staff
 
 # Decoratore per verificare se l'utente è un amministratore
+
+
 def admin_required(view_func):
     decorated_view_func = user_passes_test(
         is_admin,
         login_url='/login/',  # URL della pagina di login
-        redirect_field_name=None  # Reindirizza all'URL di login senza salvare l'URL di destinazione
+        # Reindirizza all'URL di login senza salvare l'URL di destinazione
+        redirect_field_name=None
     )(view_func)
     return decorated_view_func
 # Aggiunge un decoratore @admin_required
 
 
-'''def login(request):
-    if request.method == 'POST':
-        # Get info from POST request
-        usr = request.POST['username']
-        pas = request.POST['password']
-        user = authenticate(username=usr, password=pas)
-        request.user
-        print(user.codice_fiscale)
-
-        if user is not None:
-            return render(request, 'dashboard/index.html', {})
-        else:
-            print("The username and password were incorrect.")
-            return render(request, 'dashboard/error.html', {})
-    elif request.method == 'GET':
-        return render(request, 'login.html', {})'''
-
 @login_required
 def valutazioni(request):
-    context = {'valutazioni': Valutazione.objects.all().order_by('anno')}
+    context = {'valutazioni': Valutazione.objects.all().order_by('anno'),
+               'cf': request.user.codice_fiscale
+               }
     return render(request, "caricamentoDati/valutazioni.html", context)
 
 
@@ -95,7 +84,7 @@ def caricamento_con_file(request, filename, valutazione):
         riferimento = []
         if file:
             # Determina il tipo di file e leggi i dati appropriati
-            if filename.endswith('.csv'):
+            if file.name.endswith('.csv'):
                 csv_data = csv.reader(file.read().decode(
                     'utf-8').splitlines(), delimiter=',')
                 for valore in csv_data:
@@ -185,6 +174,7 @@ def cancella_valutazione(request, valutazione_nome):
     valutazioneDaCancellate = Valutazione.objects.filter(nome=valutazione_nome)
     valutazioneDaCancellate.delete()
     return redirect('valutazioni')
+
 
 @login_required
 def modifica_valutazione(request, valutazione_nome):
@@ -323,6 +313,9 @@ def assegnamento(request, valutazione_nome):
 
 
 def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
+    print(request.user.codice_fiscale)
+    print(docente_codice_fiscale)
+    docente_cf = request.session.get('codice_fiscale')
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
     relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
@@ -334,10 +327,10 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
         pubblicazione = relazione.pubblicazione
         altri_autori = [autore.cognome_nome for autore in Docente.objects.filter(
             relazionedocentepubblicazione__pubblicazione=pubblicazione
-        ).exclude(codiceFiscale=docente_codice_fiscale).distinct()]
+        ).exclude(codiceFiscale=docente_cf).distinct()]
         altri_autori_scelta = [autore.cognome_nome for autore in Docente.objects.filter(
             relazionedocentepubblicazione__pubblicazione=pubblicazione, relazionedocentepubblicazione__scelta__gt=0
-        ).exclude(codiceFiscale=docente_codice_fiscale).distinct()]
+        ).exclude(codiceFiscale=docente_cf).distinct()]
         valore_scelta = relazione.scelta
         quartile = pubblicazione.miglior_quartile
 
@@ -365,14 +358,14 @@ def calcola_numero_coautori_possibili(pubblicazione, relazioni_docente_pubblicaz
 
 def rimuovi_docente(docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione):
     if docente in docenti:
-        #print("Docente elaborato:", docente)
+        # print("Docente elaborato:", docente)
         relazioni_docente_pubblicazione = relazioni_docente_pubblicazione.exclude(
             autore=docente)
         docenti = docenti.exclude(pk=docente.pk)
         for pubblicazione in pubblicazioni:
             numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
                 pubblicazione, relazioni_docente_pubblicazione, docenti)
-        #print("Numero di relazioni:", len(relazioni_docente_pubblicazione),
+        # print("Numero di relazioni:", len(relazioni_docente_pubblicazione),
         #      " Numero di docenti:", len(docenti))
     return docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione
 
@@ -403,25 +396,24 @@ def assegnamento_algoritmo(request, valutazione_nome):
     giro = 0
 
     for rivista in riviste_ecc:
-        #print("Per la rivista:" + rivista.nome)
+        # print("Per la rivista:" + rivista.nome)
         pubblicazioni_rivista = pubblicazioni.filter(
             titolo_rivista_atti=rivista.nome)
         for pubblicazione in pubblicazioni_rivista:
-            #print("pubblicazione:" + pubblicazione.titolo)
+            # print("pubblicazione:" + pubblicazione.titolo)
 
             if pubblicazione.num_coautori_dip == 1:
                 relazione = RelazioneDocentePubblicazione.objects.get(
                     pubblicazione__handle=pubblicazione.handle)
 
-
                 docente = relazione.autore
                 if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
-                            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
-                                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
-                            pubblicazioni = pubblicazioni.exclude(
-                                relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
-                            break
-                
+                    docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                        docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                    pubblicazioni = pubblicazioni.exclude(
+                        relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+                    break
+
                 relazione.scelta = 1
                 relazione.save()
 
@@ -443,7 +435,7 @@ def assegnamento_algoritmo(request, valutazione_nome):
 
         progresso = 0
         giro += 1
-        #print("Giro:", giro)
+        # print("Giro:", giro)
 
         # Selezione di pubblicazioni con autore singolo
         for docente in docenti.order_by('cognome_nome'):
@@ -480,7 +472,7 @@ def assegnamento_algoritmo(request, valutazione_nome):
 
         # Selezione di pubblicazioni con autori multipli
         if progresso == 0:
-            #print("Pubblicazioni con autori multipli")
+            # print("Pubblicazioni con autori multipli")
             for pubblicazione in pubblicazioni:
                 numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
                     pubblicazione, relazioni_docente_pubblicazione, docenti)
@@ -544,37 +536,6 @@ def azzera_assegnamento(request, valutazione_nome):
     return redirect('assegnamento', valutazione)
 
 
-'''def assegnamento_algoritmo(request, valutazione_nome):
-    valutazione = Valutazione.objects.get(nome=valutazione_nome)
-    numero_selezioni_valutazione = valutazione.numeroPubblicazioni
-    pubblicazioni = PubblicazionePresentata.objects.filter(valutazione=valutazione)
-    relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(pubblicazione__valutazione=valutazione)
-    docenti = Docente.objects.annotate(num_relazioni=Count('relazionedocentepubblicazione')).order_by('num_relazioni')
-
-    numero_selezioni_docente = {docente.pk: 0 for docente in docenti}
-
-    numero_coautori_possibili_pubblicazione = {}
-
-    for pubblicazione in pubblicazioni:
-        numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(pubblicazione, relazioni_docente_pubblicazione, docenti)
-
-    for docente in docenti:
-        for quartile in [0, 1, 2, 3, 4, 5]:
-            for pubblicazione in pubblicazioni.filter(miglior_quartile=quartile):
-                if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
-                    break
-
-                if numero_coautori_possibili_pubblicazione[pubblicazione.pk] == 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente):
-                    relazione = RelazioneDocentePubblicazione.objects.get(pubblicazione=pubblicazione, autore=docente)
-                    relazione.scelta = 1
-                    relazione.save()
-                    numero_selezioni_docente[docente.pk] += 1
-                    if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
-                        break
-
-    return redirect('assegnamento', valutazione)'''
-
-
 def salva_selezioni(request, valutazione_nome, docente_codice_fiscale):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
@@ -584,11 +545,9 @@ def salva_selezioni(request, valutazione_nome, docente_codice_fiscale):
     if request.method == 'POST':
         titoli_pubblicazioni_selezionate = request.POST.getlist(
             'titoli_pubblicazione[]')
-        
+
         relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
             pubblicazione__valutazione=valutazione, autore=docente)
-        
-
 
         for relazione in relazioni_docente_pubblicazione:
             relazione.scelta = 0

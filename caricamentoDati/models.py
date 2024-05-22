@@ -5,6 +5,39 @@ import datetime
 
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
+
+
+class CustomUser(AbstractUser):
+    codice_fiscale = models.CharField(max_length=16, blank=True, null=True)
+
+    groups = models.ManyToManyField(
+        Group, related_name='custom_users', blank=True)
+    user_permissions = models.ManyToManyField(
+        Permission, related_name='custom_users', blank=True)
+
+
+def __str__(self):
+    return self.username
+
+
+# Aggiungi questo decorator per eseguire la funzione dopo che il cache delle app è pronto
+@receiver(post_migrate)
+def add_related_names(sender, **kwargs):
+    if sender.name == 'auth':
+        # Per il modello Group
+        group_user_field = Group._meta.get_field('user_set').remote_field
+        group_user_field.related_name = 'groups_user_set'
+        group_user_field.related_query_name = 'group'
+
+        # Per il modello Permission
+        permission_user_field = Permission._meta.get_field(
+            'user_set').remote_field
+        permission_user_field.related_name = 'permissions_user_set'
+        permission_user_field.related_query_name = 'permission'
+
 
 class Valutazione(models.Model):
     STATUS_CHOICES = (
@@ -36,8 +69,11 @@ class Valutazione(models.Model):
 
 class Docente(models.Model):
     # Il codice fiscale deve seguire il formato ccccccnncnncnnnc (RSSMRA80L05F593A)
-    codiceFiscale = models.CharField(max_length=16, validators=[RegexValidator(
-        regex=r'^[a-zA-Z]{6}\d{2}[a-zA-Z]{1}\d{2}[a-zA-Z]{1}\d{3}[a-zA-Z]{1}$')], primary_key=True, default='RSSMRA80L05F593A', verbose_name="codice fiscale")
+    # codiceFiscale = models.CharField(max_length=16, validators=[RegexValidator(
+    # regex=r'^[a-zA-Z]{6}\d{2}[a-zA-Z]{1}\d{2}[a-zA-Z]{1}\d{3}[a-zA-Z]{1}$')], primary_key=True, default='RSSMRA80L05F593A', verbose_name="codice fiscale")
+    codiceFiscale = models.CharField(
+        max_length=16, primary_key=True, default='RSSMRA80L05F593A', verbose_name="codice fiscale")
+
     cognome_nome = models.CharField(
         max_length=40, verbose_name="cognome e nome")
 
@@ -56,7 +92,8 @@ class RivistaEccellente(models.Model):
         Valutazione, on_delete=models.CASCADE, default='_')
     isbn = models.CharField(max_length=30, null=True, blank=True)
     nome = models.CharField(max_length=60)
-    link = models.CharField(max_length=200, blank=False, null=False, default='_')
+    link = models.CharField(max_length=200, blank=False,
+                            null=False, default='_')
 
     def __str__(self):
         return '{} - {}'.format(self.isbn, self.nome)
@@ -80,8 +117,8 @@ class PubblicazionePresentata(models.Model):
     titolo_rivista_atti = models.CharField(
         max_length=200, null=True, verbose_name="titolo della rivista o atti")
     indicizzato_scopus = models.BooleanField(default=False)
-    miglior_quartile = models.IntegerField(blank=True, default = 0, validators=[
-                                           MinValueValidator(0)], verbose_name="miglior quartile")
+    miglior_quartile = models.IntegerField(blank=True, default=0, validators=[
+        MinValueValidator(0)], verbose_name="miglior quartile")
     num_coautori_dip = models.PositiveIntegerField(
         default=1, validators=[MinValueValidator(1)], verbose_name="numero di coautori del dipartimento")
 

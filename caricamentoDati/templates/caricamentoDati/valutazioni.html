@@ -63,7 +63,7 @@
                     <button type="submit" class="btn">Cancella</button>
                   </form>
                 {% else %}
-                  <form action="{% url 'docente_pubblicazioni' valutazione.nome user.codice_fiscale %}" method="post" style="display: inline;">
+                  <form action="{% url 'docente_pubblicazioni' valutazione.nome cf %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn">Assegna Pubblicazioni</button>
                   </form>

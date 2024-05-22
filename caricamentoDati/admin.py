@@ -2,6 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from . import models
+from .models import CustomUser
 
 
 class ValutazioneAdmin(admin.ModelAdmin):
@@ -26,3 +27,4 @@ admin.site.register(models.Docente, DocenteAdmin)
 admin.site.register(models.RivistaEccellente)
 admin.site.register(models.PubblicazionePresentata, PubblicazionePresentataAdmin)
 admin.site.register(models.RelazioneDocentePubblicazione, RelazioneDocentePubblicazioneAdmin)
+admin.site.register(CustomUser)
