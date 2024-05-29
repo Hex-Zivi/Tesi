@@ -46,7 +46,7 @@
                 {% endif %}
                 <br />
               </td>
-              <td style="vertical-align: top; text-align: left;">
+              <td style="vertical-align: top;">
                 {% if user.is_staff %}
                   <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                     {% csrf_token %}
@@ -62,6 +62,11 @@
                     {% csrf_token %}
                     <button type="submit" class="btn">Cancella</button>
                   </form>
+
+                  <form action="{% url 'chiudi_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Chiudi</button>
+                  </form>
                 {% else %}
                   <form action="{% url 'docente_pubblicazioni' valutazione.nome cf %}" method="post" style="display: inline;">
                     {% csrf_token %}
@@ -76,26 +81,9 @@
     </div>
 
     <!-- Sezione di caricamento dati -->
+    {% if user.is_staff %}
     <div style="flex: 1; padding: 20px;">
-      <!--   
-      <h1>Caricamento</h1>
-      <div class="main">
-        <h1>Caricamento File CSV</h1>
-        <form method="post" enctype="multipart/form-data" action="{% url 'caricamento_con_file' filename='temp' valutazione='valutazione_nome'%}">
-            {% csrf_token %}
-            <label for="filename">Seleziona un file CSV:</label>
-            <input type="file" name="filename" id="filename">
-            <br>
-            <label for="valutazione">Seleziona una valutazione:</label>
-            <select name="valutazione" id="valutazione">
-                {% for valutazione in valutazioni %}
-                    <option value="{{ valutazione.nome }}">{{ valutazione.nome }}</option>
-                {% endfor %}
-            </select>
-            <br>
-            <button class="btn" type="submit">Carica</button>
-        </form>
-           -->
+     
 
       <h1>Crea Nuova Valutazione</h1>
       <form method="post" action="{% url 'crea_valutazione' %}">
@@ -114,5 +102,6 @@
         <button class="btn" type="submit">Crea Valutazione</button>
       </form>
     </div>
+    {% endif %}
   </div>
 {% endblock %}

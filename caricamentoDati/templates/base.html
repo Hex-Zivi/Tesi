@@ -4,7 +4,7 @@
   <head>
     <title>
       {% block title %}
-        Hello world!
+        Base
       {% endblock %}
     </title>
     <!-- icons -->
@@ -44,6 +44,7 @@
           <li>
             <a href="{% url 'valutazioni' %}">Valutazioni</a>
           </li>
+          {% if user.is_staff %}
           {% if valutazione.nome %}
         <li>
           <a href="{% url 'modifica_valutazione' valutazione.nome %}">Modifica valutazione</a>
@@ -51,6 +52,7 @@
         <li>
           <a href="{% url 'assegnamento' valutazione.nome %}">Assegnamento valutazione</a>
         </li>
+      {% endif %}
       {% endif %}
         </ul>
       </div>
@@ -60,6 +62,5 @@
 
       {% endblock %}
     </div>
-    
   </body>
 </html>

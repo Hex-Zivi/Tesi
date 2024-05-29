@@ -23,6 +23,10 @@ from django.contrib.auth.decorators import user_passes_test
 
 from django.contrib.auth import authenticate, login, logout
 
+import requests
+from bs4 import BeautifulSoup
+import re
+
 
 def is_admin(user):
     # Esempio: verifica se l'utente è autenticato e ha il ruolo di amministratore
@@ -104,7 +108,10 @@ def caricamento_con_file(request, filename, valutazione):
                         riferimento.append(intestazione.index(titolo))
 
             with transaction.atomic():
+
                 for riga in elenco[6:]:
+                    '''In assenza di un file di caricamento veritiero, ho aggiunto una colonna per il codice fiscale alla fine:
+                    modificare i numeri delle colonne in maniera consona'''
                     anno_pubblicazione = riga[0]
                     autore = riga[1]
                     handle = riga[2]
@@ -173,6 +180,15 @@ def crea_valutazione(request):
 def cancella_valutazione(request, valutazione_nome):
     valutazioneDaCancellate = Valutazione.objects.filter(nome=valutazione_nome)
     valutazioneDaCancellate.delete()
+    return redirect('valutazioni')
+
+
+@login_required
+def chiudi_valutazione(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    valutazione.status = "Chiusa"
+    valutazione.save()
+
     return redirect('valutazioni')
 
 
@@ -396,34 +412,39 @@ def assegnamento_algoritmo(request, valutazione_nome):
     giro = 0
 
     for rivista in riviste_ecc:
+        if rivista.issn2:
+            lista_issn = rivista.issn1, rivista.issn2
+        else:
+            lista_issn = rivista.issn1
         # print("Per la rivista:" + rivista.nome)
-        pubblicazioni_rivista = pubblicazioni.filter(
-            titolo_rivista_atti=rivista.nome)
-        for pubblicazione in pubblicazioni_rivista:
-            # print("pubblicazione:" + pubblicazione.titolo)
+        for issn in lista_issn:
+            pubblicazioni_rivista = pubblicazioni.filter(
+                issn_isbn=issn)
+            for pubblicazione in pubblicazioni_rivista:
+                print("pubblicazione:" + pubblicazione.titolo)
 
-            if pubblicazione.num_coautori_dip == 1:
-                relazione = RelazioneDocentePubblicazione.objects.get(
-                    pubblicazione__handle=pubblicazione.handle)
+                if pubblicazione.num_coautori_dip == 1:
+                    relazione = RelazioneDocentePubblicazione.objects.get(
+                        pubblicazione__handle=pubblicazione.handle)
 
-                docente = relazione.autore
-                if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
-                    docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
-                        docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
-                    pubblicazioni = pubblicazioni.exclude(
-                        relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
-                    break
+                    docente = relazione.autore
+                    if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
+                        docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                            docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                        pubblicazioni = pubblicazioni.exclude(
+                            relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+                        break
 
-                relazione.scelta = 1
-                relazione.save()
+                    relazione.scelta = 1
+                    relazione.save()
 
-                numero_selezioni_docente[docente.pk] += 1
-                if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
-                    docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
-                        docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
-                    progresso = 1
-                    pubblicazioni = pubblicazioni.exclude(
-                        relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+                    numero_selezioni_docente[docente.pk] += 1
+                    if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                        docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                            docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                        progresso = 1
+                        pubblicazioni = pubblicazioni.exclude(
+                            relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
 
     while progresso == 1:
         journal_1_singoloAutore = pubblicazioni.filter(
@@ -562,7 +583,11 @@ def salva_selezioni(request, valutazione_nome, docente_codice_fiscale):
                 relazione.scelta = 1
                 relazione.save()
 
-    return redirect('assegnamento', valutazione_nome)
+    if is_admin(request.user):
+        return redirect('assegnamento', valutazione_nome)
+
+    else:
+        return redirect('valutazioni')
 
 
 def riviste_eccellenti(request, valutazione_nome):
@@ -573,6 +598,14 @@ def riviste_eccellenti(request, valutazione_nome):
         'riviste': riviste
     }
     return render(request, 'caricamentoDati/riviste_eccellenti.html', context)
+
+
+def format_ISSN(issn_text):
+    # Rimuove tutti i caratteri non numerici dall'ISSN
+    digits = re.sub(r'\D', '', issn_text)
+    # Formatta l'ISSN nel formato 'XXXX-XXXX'
+    formatted_issn = '-'.join([digits[:4], digits[4:]])
+    return formatted_issn
 
 
 def carica_riviste(request, valutazione_nome):
@@ -590,13 +623,41 @@ def carica_riviste(request, valutazione_nome):
 
             with transaction.atomic():
                 for riga in elenco[1:]:
-                    nome = riga[0]
-                    nome = nome.upper()
+                    nome = riga[0].upper()
                     link = riga[1]
 
+                    response = requests.get(link)
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                    issn_header = soup.find('h2', string="ISSN")
+                    issn_element = issn_header.find_next(
+                        'p') if issn_header else None
+                    issn_text = issn_element.text.strip() if issn_element else "ISSN non trovato"
+
+                    # Se ci sono più di un ISSN, dividi e formatta entrambi
+                    issn_list = [format_ISSN(issn.strip())
+                                 for issn in issn_text.split(',')]
+                    issn1 = issn_list[0] if issn_list else ''
+                    issn2 = issn_list[1] if len(issn_list) > 1 else ''
+
+                    print(f"ISSN 1: {issn1}")
+                    print(f"ISSN 2: {issn2}")
+
                     if not RivistaEccellente.objects.filter(valutazione=valutazione, nome=nome).exists():
-
                         RivistaEccellente.objects.create(
-                            valutazione=valutazione, nome=nome, link=link)
+                            valutazione=valutazione,
+                            nome=nome,
+                            link=link,
+                            issn1=issn1,
+                            issn2=issn2
+                        )
 
+    return redirect('riviste_eccellenti', valutazione)
+
+
+def cancella_riviste(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    riviste = RivistaEccellente.objects.filter(
+        valutazione=valutazione)
+    for rivista in riviste:
+        rivista.delete()
     return redirect('riviste_eccellenti', valutazione)

@@ -8,7 +8,7 @@ Riviste Eccellenti
         <div style="display: flex;">
           <div style="padding: 20px;">
             <h2>Cancella riviste</h2>
-            <form method="post" action="{% url 'cancella_pubblicazioni_tot' valutazione.nome %}">
+            <form method="post" action="{% url 'cancella_riviste' valutazione.nome %}">
               {% csrf_token %}
     
               <button class="btn" type="submit">Cancella</button>
@@ -40,6 +40,9 @@ Riviste Eccellenti
                       <td style="vertical-align: top; text-align: left;">
                         <b>Titolo</b>
                       </td>
+                      <td>
+                        <b>ISSN</b>
+                      </td>
                       <td style="vertical-align: top; text-align: left;">
                         <b>link</b>
                       </td>
@@ -47,6 +50,7 @@ Riviste Eccellenti
                     {% for rivista in riviste %}
                       <tr>
                         <td>{{ rivista.nome }}</td>
+                        <td>{{ rivista.issn1 }} {% if rivista.issn2 %}, {{ rivista.issn2 }}{%endif%}</td>
                         <td><a href="{{ rivista.link }}">{{ rivista.link }}</a></td>
                       </tr>
                     {% endfor %}

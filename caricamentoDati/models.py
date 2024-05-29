@@ -90,13 +90,14 @@ class RivistaEccellente(models.Model):
 
     valutazione = models.ForeignKey(
         Valutazione, on_delete=models.CASCADE, default='_')
-    isbn = models.CharField(max_length=30, null=True, blank=True)
+    issn1 = models.CharField(max_length=30, null=True, blank=True)
+    issn2 = models.CharField(max_length=30, null=True, blank=True)
     nome = models.CharField(max_length=60)
     link = models.CharField(max_length=200, blank=False,
                             null=False, default='_')
 
     def __str__(self):
-        return '{} - {}'.format(self.isbn, self.nome)
+        return '{}   -   {}   -   {}'.format(self.nome, self.issn1, self.issn2)
 
     class Meta:
         verbose_name_plural = "Riviste Eccellenti"

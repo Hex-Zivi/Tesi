@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
 
-    ###path('login', views.login, name="login"),
+    # path('login', views.login, name="login"),
 
 
     path('', views.valutazioni, name="valutazioni"),
@@ -57,5 +57,11 @@ urlpatterns = [
 
     re_path('^carica_riviste/(?P<valutazione_nome>.*)/$',
             views.carica_riviste, name="carica_riviste"),
+
+    re_path('^cancella_riviste/(?P<valutazione_nome>.*)/$', views.cancella_riviste,
+            name='cancella_riviste'),
+
+    re_path('^chiudi valutazione/(?P<valutazione_nome>.*)/$', views.chiudi_valutazione,
+            name='chiudi_valutazione'),
 
 ]
