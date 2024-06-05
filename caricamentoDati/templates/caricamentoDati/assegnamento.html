@@ -107,7 +107,7 @@
         {% for docente in informazioni_docente.docenti_info %}
           <tr>
             <td>
-              <input type="checkbox" {% if docente.num_pubblicazioni_assegnate == docente.num_pubblicazioni_richieste or docente.num_pubblicazioni_assegnate == docente.pubblicazioni_totali %}checked{% endif %} disabled>
+              <input type="checkbox" {% if docente.num_pubblicazioni_assegnate == docente.num_pubblicazioni_richieste or docente.num_pubblicazioni_assegnate == docente.pubblicazioni_totali and docente.pubblicazioni_totali < docente.num_pubblicazioni_richieste%}checked{% endif %} disabled>
               &nbsp;
               <a href="{% url 'docente_pubblicazioni' valutazione.nome docente.codice_fiscale %}">{{ docente.cognome_nome }}</a>
             </td>

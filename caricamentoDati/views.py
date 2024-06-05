@@ -221,28 +221,30 @@ def cancella_pubblicazione_singola(request, pubblicazione_titolo, valutazione_no
 
 
 # ==================== AGGIUNTA PUBBLICAZIONE ====================
+from django.template.loader import render_to_string
+from django.http import JsonResponse
+
 def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     if docente != 'admin':
         docente = Docente.objects.get(codiceFiscale=docente)
-        form = FormAggiungiPubblicazione(
-            initial={'autori': [docente.codiceFiscale]})
-        context = {
-            'valutazione': valutazione,
-            'caller': caller,
-            'docente': docente.codiceFiscale,
-            'form_aggiungi_pubblicazione': form,
-        }
+        form = FormAggiungiPubblicazione(initial={'autori': [docente.codiceFiscale]})
     else:
         form = FormAggiungiPubblicazione()
-        context = {
-            'valutazione': valutazione,
-            'caller': caller,
-            'docente': docente,
-            'form_aggiungi_pubblicazione': form,
-        }
+
+    context = {
+        'valutazione': valutazione,
+        'caller': caller,
+        'docente': docente,
+        'form_aggiungi_pubblicazione': form,
+    }
+
+    if request.is_ajax():
+        html = render_to_string('caricamentoDati/aggiungi_pubblicazione.html', context, request=request)
+        return JsonResponse({'html': html})
 
     return render(request, 'caricamentoDati/aggiungi_pubblicazione.html', context)
+
 
 
 def aggiungi_pubblicazione(request, valutazione_nome, docente):

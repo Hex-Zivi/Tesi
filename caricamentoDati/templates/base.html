@@ -4,44 +4,43 @@
   <head>
     <title>
       {% block title %}
-      Base
+        Base
       {% load bootstrap5 %}
       {% bootstrap_css %}
-      {% bootstrap_javascript %}
       {% endblock %}
     </title>
     <!-- icons -->
     <link href="{% static 'favicon.ico' %}" rel="shortcut icon" />
-
     <!-- stile CSS -->
     <link href="{% static 'styles.css' %}" rel="stylesheet" type="text/css" />
+
+
+    
   </head>
-
-  <div class="header">
-    <div class="id">
-      {{ login }}
-      <form action="/logout/" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn" style="background-color: #00cc44;">Logout</button>
-      </form>
-    </div>
-    <div class="container">
-      <div>
-        <a href="http://www.univr.it" target="blanc"><img alt="univr" class="img-responsive, img_header" src="{% static 'logo-univr.png' %}" style="width:60px;height:60px;" /></a>
-      </div>
-      <div class="header-heading">
-        <a href="http://www.univr.it/" target="blank">UNIVERSIT&Agrave; <br />di <strong>VERONA</strong></a>
-      </div>
-      <div class="header-heading">
-        <a href="http://www.di.univr.it/" target="blank">Dipartimento<br />di <strong>INFORMATICA</strong></a>
-      </div>
-      <div class="header-heading">
-        <br /><a href=""><strong>FONDO FUR</strong></a>
-      </div>
-    </div>
-  </div>
-
   <body>
+    <div class="header">
+      <div class="id">
+        {{ login }}
+        <form action="/logout/" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn" style="background-color: #00cc44;">Logout</button>
+        </form>
+      </div>
+      <div class="container">
+        <div>
+          <a href="http://www.univr.it" target="blanc"><img alt="univr" class="img-responsive, img_header" src="{% static 'logo-univr.png' %}" style="width:60px;height:60px;" /></a>
+        </div>
+        <div class="header-heading">
+          <a href="http://www.univr.it/" target="blank">UNIVERSIT&Agrave; <br />di <strong>VERONA</strong></a>
+        </div>
+        <div class="header-heading">
+          <a href="http://www.di.univr.it/" target="blank">Dipartimento<br />di <strong>INFORMATICA</strong></a>
+        </div>
+        <div class="header-heading">
+          <br /><a href=""><strong>FONDO FUR</strong></a>
+        </div>
+      </div>
+    </div>
     <div class="nav-bar">
       <div class="container">
         <ul class="nav">
@@ -65,18 +64,40 @@
       {% block content %}
 
       {% endblock %}
-    </div>
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <div id="modal-body"></div>
+      <div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalLabel">Aggiungi Pubblicazione</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+          </div>
+        </div>
       </div>
     </div>
-
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Bootstrap JS bundle (include Popper) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS (se necessario) -->
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <!-- Script personalizzato -->
     <script>
-      $(document).ready(function() {
-        $('#table-pubblicazioni').DataTable();
-      });
+      $(document).ready(function () {
+        $('#table-pubblicazioni').DataTable()
+        $('#modal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget) // Button that triggered the modal
+          var url = button.data('url') // Extract info from data-* attributes
+          var modal = $(this)
+          $.ajax({
+            url: url,
+            success: function (data) {
+              modal.find('.modal-body').html(data)
+            }
+          })
+        })
+      })
     </script>
   </body>
 </html>
