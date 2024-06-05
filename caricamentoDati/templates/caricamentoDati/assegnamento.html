@@ -24,18 +24,10 @@
         </form>
       </div>
       <div style="padding: 20px;">
-        <h2>Carica nuova pubblicazione</h2>
-    
-        <button onclick="openPopup()" class="btn">Aggiungi pubblicazione</button>
-    
-        <script>
-            function openPopup() {
-                var url = "{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome docente='admin' %}";
-                window.open(url, "popupWindow", "width=1800,height=800,scrollbars=yes");
-            }
-        </script>
-    </div>
+        <h2>Aggiungi pubblicazione</h2>
+        <button type="button" class="btn" data-toggle="modal" data-target="#aggiungiPubblicazioneModal" onclick="loadModalContent()">Aggiungi pubblicazione</button>
       </div>
+    </div>
 
 
 <!-- FORM PER L'AGGIUNTA DI UNA PUBBLICAZIONE
@@ -120,4 +112,19 @@
       </table>
     </div>
   </div>
+  <script>
+  function loadModalContent() {
+    var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}"
+    fetch(url, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById('modalContent').innerHTML = data.html
+      })
+      .catch((error) => console.error('Errore nel caricamento del contenuto del modale:', error))
+  }
+</script>
 {% endblock %}

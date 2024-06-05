@@ -1,63 +1,94 @@
 {% extends 'base.html' %}
 {% block title %}
-Riviste Eccellenti
+  Riviste Eccellenti
 {% endblock %}
 {% block content %}
-<div class="main">
-        <h1>Riviste eccellenti per {{ valutazione.nome }}</h1>
-        <div style="display: flex;">
-          <div style="padding: 20px;">
-            <h2>Cancella riviste</h2>
-            <form method="post" action="{% url 'cancella_riviste' valutazione.nome %}">
-              {% csrf_token %}
-    
-              <button class="btn" type="submit">Cancella</button>
-            </form>
-          </div>
-          <div style="padding: 20px;">
-            <h2>Carica Riviste</h2>
-            <form method="post" enctype="multipart/form-data" action="{% url 'carica_riviste' valutazione_nome=valutazione.nome %}">
-              {% csrf_token %}
-              <label for="filename">Seleziona un file XLSX:</label>
-              <input type="file" name="filename" id="filename" />
-              <br/>
-              <button class="btn" type="submit">Carica</button>
-            </form>
-          </div>
-    
-          <div style="padding: 20px;">
-            <h2>Aggiungi Rivista</h2>
-        
-            <button class="btn">Aggiungi</button>
-          </div>
-        </div>
+  <div class="main">
+    <h1>Riviste eccellenti per {{ valutazione.nome }}</h1>
+    <div style="display: flex;">
+      <div style="padding: 20px;">
+        <h2>Cancella riviste</h2>
+        <form method="post" action="{% url 'cancella_riviste' valutazione.nome %}">
+          {% csrf_token %}
 
-        <div style="padding-top: 80px;">
-                {% if riviste %}
-                  <h2>Pubblicazioni</h2>
-                  <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
-                    <tr>
-                      <td style="vertical-align: top; text-align: left;">
-                        <b>Titolo</b>
-                      </td>
-                      <td>
-                        <b>ISSN</b>
-                      </td>
-                      <td style="vertical-align: top; text-align: left;">
-                        <b>link</b>
-                      </td>
-                    </tr>
-                    {% for rivista in riviste %}
-                      <tr>
-                        <td>{{ rivista.nome }}</td>
-                        <td>{{ rivista.issn1 }} {% if rivista.issn2 %}, {{ rivista.issn2 }}{%endif%}</td>
-                        <td><a href="{{ rivista.link }}">{{ rivista.link }}</a></td>
-                      </tr>
-                    {% endfor %}
-                  </table>
-                {% else %}
-                  <p>Non ci sono pubblicazioni disponibili.</p>
+          <button class="btn" type="submit">Cancella</button>
+        </form>
+      </div>
+      <div style="padding: 20px;">
+        <h2>Carica Riviste</h2>
+        <form method="post" enctype="multipart/form-data" action="{% url 'carica_riviste' valutazione_nome=valutazione.nome %}">
+          {% csrf_token %}
+          <label for="filename">Seleziona un file XLSX:</label>
+          <input type="file" name="filename" id="filename" />
+          <br />
+          <button class="btn" type="submit">Carica</button>
+        </form>
+      </div>
+    </div>
+
+    <div style="padding-top: 80px;">
+      {% if riviste %}
+        <h2>Pubblicazioni</h2>
+        <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+          <tr>
+            <td style="vertical-align: top; text-align: left;">
+              <b>Titolo</b>
+            </td>
+            <td>
+              <b>ISSN</b>
+            </td>
+            <td style="vertical-align: top; text-align: left;">
+              <b>link</b>
+            </td>
+          </tr>
+          {% for rivista in riviste %}
+            <tr>
+              <td>{{ rivista.nome }}</td>
+              <td>
+                {{ rivista.issn1 }} {% if rivista.issn2 %}
+                  , {{ rivista.issn2 }}
                 {% endif %}
-              </div>
-</div>
+              </td>
+              <td>
+                <a href="{{ rivista.link }}">{{ rivista.link }}</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% else %}
+        <p>Non ci sono riviste disponibili.</p>
+      {% endif %}
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var form = document.querySelector('#modifica_riviste_form')
+      form.addEventListener('submit', function (event) {
+        event.preventDefault() // Previeni il comportamento predefinito della form
+    
+        // Effettua una richiesta AJAX per salvare le modifiche alle riviste eccellenti
+        fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          }
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Se le modifiche sono state salvate con successo, chiudi la finestra corrente
+              $('#rivisteEccellentiModal').modal('hide')
+              location.reload() // Opzionale: Ricarica la pagina o aggiorna la tabella con i nuovi dati
+            } else {
+              // Gestisci eventuali errori o altre situazioni qui
+              console.error('Errore durante il salvataggio delle riviste eccellenti')
+            }
+          })
+          .catch((error) => {
+            console.error('Si è verificato un errore:', error)
+          })
+      })
+    })
+  </script>
 {% endblock %}

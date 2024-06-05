@@ -28,7 +28,7 @@ urlpatterns = [
     re_path('^aggiungi_pubblicazione_pagina/(?P<valutazione_nome>.*)/(?P<caller>.*)/(?P<docente>.*)/$',
             views.aggiungi_pubblicazione_pagina, name="aggiungi_pubblicazione_pagina"),
 
-    re_path('^aggiungi_pubblicazione/(?P<valutazione_nome>.*)/(?P<docente>.*)/$',
+    re_path('^aggiungi_pubblicazione/(?P<valutazione_nome>.*)/(?P<docente>.*)/(?P<caller>.*)/$',
             views.aggiungi_pubblicazione, name="aggiungi_pubblicazione"),
 
     re_path('^cancella_pubblicazioni_tot/(?P<valutazione_nome>.*)/$', views.cancella_pubblicazioni_tot,

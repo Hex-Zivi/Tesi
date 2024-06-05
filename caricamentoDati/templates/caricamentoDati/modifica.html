@@ -10,7 +10,6 @@
         <h2>Cancella tutte le pubblicazioni</h2>
         <form method="post" action="{% url 'cancella_pubblicazioni_tot' valutazione.nome %}">
           {% csrf_token %}
-
           <button class="btn" type="submit">Cancella</button>
         </form>
       </div>
@@ -25,80 +24,35 @@
         </form>
       </div>
 
-
-
-
-        <!-- Altro contenuto precedente al pulsante del modale -->
-
-<!-- Pulsante per aprire il modale -->
-<button type="button" class="btn" onclick="openModal()">Apri Modale</button>
-
-<!-- Modal -->
-<div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalLabel">Aggiungi Pubblicazione</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Form di aggiunta pubblicazione -->
-        <form id="aggiungi_pubblicazione_form" method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome docente=docente %}">
-          {% csrf_token %}
-          {{ form_aggiungi_pubblicazione.as_p }}
-          <button class="btn" type="submit">Aggiungi</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Altro contenuto dopo il modale -->
-
-
-
-
-
-  
-
-
-
-
-<!--
+      <!-- Pulsante per aprire il modale -->
       <div style="padding: 20px;">
-        <h2>Modal</h2>
-        <button type="button" class="btn" data-toggle="modal" data-target="#modal" data-url="{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='caller' docente='admin' %}">Aggiungi pubblicazione</button>
+        <h2>Aggiungi pubblicazione</h2>
+        <button type="button" class="btn" data-toggle="modal" data-target="#aggiungiPubblicazioneModal" onclick="loadModalContent()">Aggiungi pubblicazione</button>
       </div>
-    -->  
 
-      <div style="padding: 20px;">
-        <h2>Carica nuova pubblicazione</h2>
-
-        <button onclick="openPopup()" class="btn">Aggiungi pubblicazione</button>
-
-        <script>
-          function openPopup() {
-            var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='caller' docente='admin' %}"
-            window.open(url, 'popupWindow', 'width=1800,height=800,scrollbars=yes')
-          }
-        </script>
-      </div>
+      
 
       <div style="padding: 20px;">
         <h2>Riviste eccellenti</h2>
+        <button type="button" class="btn" data-toggle="modal" data-target="#rivisteEccellentiModal" onclick="loadRivisteEccellentiModalContent()">Modifica riviste eccellenti</button>
+      </div>
 
-        <button onclick="openPopup2()" class="btn">Modifica riviste eccellenti</button>
-
-        <script>
-          function openPopup2() {
-            var url = "{% url 'riviste_eccellenti' valutazione_nome=valutazione.nome %}"
-            window.open(url, 'popupWindow', 'width=1800,height=800,scrollbars=yes')
-          }
-        </script>
+      <!-- Modale per riviste eccellenti -->
+      <div id="rivisteEccellentiModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalRivisteLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalRivisteLabel">Modifica Riviste Eccellenti</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" id="modalRivisteContent">
+              <!-- Il contenuto del modale verrà caricato dinamicamente qui -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
     <div style="padding-top: 80px;">
       {% if pubblicazioni %}
         <h2>Pubblicazioni</h2>
@@ -132,7 +86,6 @@
                 <div type="button" style="padding-left: 40px;">
                   <form method="post" action="{% url 'cancella_pubblicazione_singola' valutazione_nome=valutazione.nome pubblicazione_titolo=pubblicazione.titolo %}">
                     {% csrf_token %}
-
                     <button class="btn" type="submit">Cancella</button>
                   </form>
                 </div>
@@ -146,44 +99,33 @@
     </div>
   </div>
 
-
-  
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Listener per il form di aggiunta pubblicazione
-      var form = document.querySelector('#aggiungi_pubblicazione_form');
-      form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Evita il comportamento predefinito del form
-
-        // Esegui una richiesta AJAX per aggiungere la pubblicazione
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-              'X-CSRFToken': '{{ csrf_token }}'
-            }
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              // Chiudi il modale al termine dell'operazione
-              $('#modal').modal('hide');
-              location.reload(); // Opzionale: Ricarica la pagina o aggiorna la tabella con i nuovi dati
-            } else {
-              // Gestisci errori o altre situazioni qui
-              console.error('Errore durante l\'aggiunta della pubblicazione');
-            }
-          })
-          .catch(error => {
-            console.error('Si è verificato un errore:', error);
-          });
-      });
-    });
-  </script>
-  <script>
-    // Funzione per aprire il modale
-    function openModal() {
-      $('#modal').modal('show'); // Mostra il modale
+    function loadModalContent() {
+      var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}"
+      fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById('modalContent').innerHTML = data.html
+        })
+        .catch((error) => console.error('Errore nel caricamento del contenuto del modale:', error))
+    }
+    
+    function loadRivisteEccellentiModalContent() {
+      var url = "{% url 'riviste_eccellenti' valutazione_nome=valutazione.nome %}"
+      fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById('modalRivisteContent').innerHTML = data.html
+        })
+        .catch((error) => console.error('Errore nel caricamento del contenuto del modale:', error))
     }
   </script>
 {% endblock %}

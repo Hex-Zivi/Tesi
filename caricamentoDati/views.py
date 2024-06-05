@@ -1,3 +1,5 @@
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 import csv
 import datetime
 from django.db import transaction
@@ -221,14 +223,14 @@ def cancella_pubblicazione_singola(request, pubblicazione_titolo, valutazione_no
 
 
 # ==================== AGGIUNTA PUBBLICAZIONE ====================
-from django.template.loader import render_to_string
-from django.http import JsonResponse
+
 
 def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     if docente != 'admin':
         docente = Docente.objects.get(codiceFiscale=docente)
-        form = FormAggiungiPubblicazione(initial={'autori': [docente.codiceFiscale]})
+        form = FormAggiungiPubblicazione(
+            initial={'autori': [docente.codiceFiscale]})
     else:
         form = FormAggiungiPubblicazione()
 
@@ -239,15 +241,15 @@ def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
         'form_aggiungi_pubblicazione': form,
     }
 
-    if request.is_ajax():
-        html = render_to_string('caricamentoDati/aggiungi_pubblicazione.html', context, request=request)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string(
+            'caricamentoDati/aggiungi_pubblicazione.html', context, request=request)
         return JsonResponse({'html': html})
 
     return render(request, 'caricamentoDati/aggiungi_pubblicazione.html', context)
 
 
-
-def aggiungi_pubblicazione(request, valutazione_nome, docente):
+def aggiungi_pubblicazione(request, valutazione_nome, docente, caller):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     if docente != 'admin':
         docente = Docente.objects.get(codiceFiscale=docente)
@@ -280,7 +282,8 @@ def aggiungi_pubblicazione(request, valutazione_nome, docente):
                     autore=docente, pubblicazione=nuova_pubblicazione)
                 nuova_relazione.save()
 
-                return HttpResponse('<script>window.close()</script>')
+            if caller == "modifica":
+                return redirect('modifica_valutazione', valutazione)
 
         else:
             form = FormAggiungiPubblicazione(request.POST)
@@ -602,6 +605,11 @@ def riviste_eccellenti(request, valutazione_nome):
         'valutazione': valutazione,
         'riviste': riviste
     }
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string(
+            'caricamentoDati/riviste_eccellenti.html', context, request=request)
+        return JsonResponse({'html': html})
+
     return render(request, 'caricamentoDati/riviste_eccellenti.html', context)
 
 
