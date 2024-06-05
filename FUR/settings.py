@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'caricamentoDati',
+    'bootstrap5',
     'django.contrib.admindocs', # admindocs, opzionale
 ]
 

@@ -25,7 +25,10 @@ Vista pubblicazioni del docente
       <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
         <tr>
           <td style="vertical-align: top; text-align: left;"><b>Titolo</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Coautori</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Anno di pubblicazione</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Tipologia collezzione</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Titolo rivista o atti</b></td>
+          <td style="vertical-align: top; text-align: left;"><b>Autori</b></td>
           <td style="vertical-align: top; text-align: left;"><b>Selezionato da</b></td>
           <td style="vertical-align: top; text-align: left;"><b>Quartile</b></td>
           <td style="vertical-align: top; text-align: left;"><b>Selezione</b></td>
@@ -34,6 +37,9 @@ Vista pubblicazioni del docente
         <tr>
           <td>{{ pubblicazione.titolo }}</td>
           <input type="hidden" name="titolo_pubblicazione[]" value="{{ pubblicazione.titolo }}">
+          <td>{{pubblicazione.anno}}</td>
+          <td>{{pubblicazione.tipologia}}</td>
+          <td>{{pubblicazione.rivista}}</td>
           <td>
             {% for autore in pubblicazione.altri_autori %}
             {{ autore }}{% if not forloop.last %}, {% endif %}

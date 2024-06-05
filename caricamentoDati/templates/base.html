@@ -4,7 +4,10 @@
   <head>
     <title>
       {% block title %}
-        Base
+      Base
+      {% load bootstrap5 %}
+      {% bootstrap_css %}
+      {% bootstrap_javascript %}
       {% endblock %}
     </title>
     <!-- icons -->
@@ -13,31 +16,32 @@
     <!-- stile CSS -->
     <link href="{% static 'styles.css' %}" rel="stylesheet" type="text/css" />
   </head>
-  
+
   <div class="header">
-    <div class="id">{{ login }}
+    <div class="id">
+      {{ login }}
       <form action="/logout/" method="post">
         {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-    
+        <button type="submit" class="btn" style="background-color: #00cc44;">Logout</button>
+      </form>
     </div>
     <div class="container">
-        <div><a href="http://www.univr.it" target="blanc"><img alt="univr" class="img-responsive, img_header"
-                                                               src="{% static 'logo-univr.png' %}"
-                                                               style="width:60px;height:60px;"/></a></div>
-        <div class="header-heading"><a href="http://www.univr.it/" target="blank">UNIVERSIT&Agrave; <br/>di<strong>
-            VERONA</strong></a></div>
-        <div class="header-heading"><a href="http://www.di.univr.it/" target="blank">Dipartimento<br/>di<strong>
-            INFORMATICA</strong></a></div>
-        <div class="header-heading"><br/><a href=""><strong>FONDO FUR</strong></a></div>
+      <div>
+        <a href="http://www.univr.it" target="blanc"><img alt="univr" class="img-responsive, img_header" src="{% static 'logo-univr.png' %}" style="width:60px;height:60px;" /></a>
+      </div>
+      <div class="header-heading">
+        <a href="http://www.univr.it/" target="blank">UNIVERSIT&Agrave; <br />di <strong>VERONA</strong></a>
+      </div>
+      <div class="header-heading">
+        <a href="http://www.di.univr.it/" target="blank">Dipartimento<br />di <strong>INFORMATICA</strong></a>
+      </div>
+      <div class="header-heading">
+        <br /><a href=""><strong>FONDO FUR</strong></a>
+      </div>
     </div>
-</div>
-
+  </div>
 
   <body>
-    
-
     <div class="nav-bar">
       <div class="container">
         <ul class="nav">
@@ -45,15 +49,15 @@
             <a href="{% url 'valutazioni' %}">Valutazioni</a>
           </li>
           {% if user.is_staff %}
-          {% if valutazione.nome %}
-        <li>
-          <a href="{% url 'modifica_valutazione' valutazione.nome %}">Modifica valutazione</a>
-        </li>
-        <li>
-          <a href="{% url 'assegnamento' valutazione.nome %}">Assegnamento valutazione</a>
-        </li>
-      {% endif %}
-      {% endif %}
+            {% if valutazione.nome %}
+              <li>
+                <a href="{% url 'modifica_valutazione' valutazione.nome %}">Modifica valutazione</a>
+              </li>
+              <li>
+                <a href="{% url 'assegnamento' valutazione.nome %}">Assegnamento valutazione</a>
+              </li>
+            {% endif %}
+          {% endif %}
         </ul>
       </div>
     </div>
@@ -62,5 +66,17 @@
 
       {% endblock %}
     </div>
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function() {
+        $('#table-pubblicazioni').DataTable();
+      });
+    </script>
   </body>
 </html>

@@ -6,39 +6,40 @@
   <div style="display: flex;">
     <div style="flex: 3; padding: 20px;">
       <h1>Valutazioni</h1>
-      <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
-        <tbody>
+      <table class="table table-bordered">
+        <thead>
           <tr>
-            <td style="vertical-align: top; text-align: left;">
+            <th style="vertical-align: top; text-align: left;">
               <b>Anno</b><br />
-            </td>
-            <td style="vertical-align: top; text-align: left;">
+            </th>
+            <th style="vertical-align: top; text-align: left;">
               <b>Nome</b><br />
-            </td>
-            <td style="vertical-align: top; text-align: left;">
+            </th>
+            <th style="vertical-align: top; text-align: left;">
               <b>Numero di Pubblicazioni per autore</b><br />
-            </td>
-            <td style="vertical-align: top; text-align: left;">
+            </th>
+            <th style="vertical-align: top; text-align: left;">
               <b>Stato</b><br />
-            </td>
-            <td style="vertical-align: top; text-align: left;">
+            </th>
+            <th style="vertical-align: top; text-align: left;">
               <b>Azioni</b><br />
-            </td>
+            </th>
           </tr>
-
+        </thead>
+        <tbody>
           <!-- Riga di una valutazione -->
           {% for valutazione in valutazioni %}
             <tr>
-              <td style="vertical-align: top; text-align: left;">
+              <td style="vertical-align; text-align: left;">
                 {{ valutazione.anno }}<br />
               </td>
-              <td style="vertical-align: top; text-align: left;">
+              <td style="vertical-align; text-align: left;">
                 {{ valutazione.nome }}<br />
               </td>
-              <td style="vertical-align: top; text-align: center;">
+              <td style="vertical-align; text-align: center;">
                 {{ valutazione.numeroPubblicazioni }}<br />
               </td>
-              <td style="vertical-align: top; text-align: left;">
+              <td style="vertical-align; text-align: left;">
                 {% if valutazione.status == 'Pubblicazioni caricate' %}
                   {{ valutazione.status }} in data {{ valutazione.dataCaricamentoPubblicazioni }}
                 {% else %}
@@ -46,7 +47,7 @@
                 {% endif %}
                 <br />
               </td>
-              <td style="vertical-align: top;">
+              <td style="vertical-align: top; text-align: left;">
                 {% if user.is_staff %}
                   <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                     {% csrf_token %}
@@ -82,26 +83,42 @@
 
     <!-- Sezione di caricamento dati -->
     {% if user.is_staff %}
-    <div style="flex: 1; padding: 20px;">
-     
+      <div class="container mt-5" style="padding-left: 20px; margin-top: 20px; margin-right: 20px;">
+        <h1>Crea Nuova Valutazione</h1>
+        <form method="post" action="{% url 'crea_valutazione' %}">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="nome" class="col-form-label">Nome:</label>
+              <input type="text" class="form-control" name="nome" id="nome" required />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="anno" class="col-form-label">Anno:</label>
+              <input type="text" class="form-control" name="anno" id="anno" min="2000" max="9999" value="{{ current_year }}" required />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="numero_pubblicazioni" class="col-form-label">Numero di Pubblicazioni da assegnare:</label>
+              <input type="text" class="form-control" name="numero_pubblicazioni" id="numero_pubblicazioni" min="0" max="999" required />
+            </div>
+          </div>
+          <button class="btn btn-primary mt-3" type="submit">Crea Valutazione</button>
+        </form>
+      </div>
 
-      <h1>Crea Nuova Valutazione</h1>
-      <form method="post" action="{% url 'crea_valutazione' %}">
-        {% csrf_token %}
-
-        <label for="nome">Nome:</label>
-        <input type="text" name="nome" id="nome" required />
-        <br />
-        <label for="anno">Anno:</label>
-        <input type="number" name="anno" id="anno" min="2000" max="9999" value="{{ current_year }}" required />
-        <br />
-        <br />
-        <label for="numero_pubblicazioni">Numero di Pubblicazioni da assegnare:</label>
-        <input type="number" name="numero_pubblicazioni" id="numero_pubblicazioni" min="0" max="999" required />
-        <br />
-        <button class="btn" type="submit">Crea Valutazione</button>
-      </form>
-    </div>
+      <style>
+        .form-group {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .col-form-label {
+          margin-top: 10px;
+        }
+        
+        .form-control {
+          margin-bottom: 2px;
+        }
+      </style>
     {% endif %}
   </div>
 {% endblock %}

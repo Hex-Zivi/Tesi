@@ -352,6 +352,9 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
 
         pubblicazione_info = {
             'titolo': pubblicazione.titolo,
+            'anno': pubblicazione.anno_pubblicazione,
+            'tipologia': pubblicazione.tipologia_collezione,
+            'rivista': pubblicazione.titolo_rivista_atti,
             'altri_autori': altri_autori,
             'altri_autori_scelta': altri_autori_scelta,
             'valore_scelta': valore_scelta,

@@ -20,64 +20,60 @@
           {% csrf_token %}
           <label for="filename">Seleziona un file CSV:</label>
           <input type="file" name="filename" id="filename" />
-          <br/>
+          <br />
           <button class="btn" type="submit">Carica</button>
         </form>
       </div>
 
       <div style="padding: 20px;">
         <h2>Carica nuova pubblicazione</h2>
-    
+
         <button onclick="openPopup()" class="btn">Aggiungi pubblicazione</button>
-    
+
         <script>
-            function openPopup() {
-                var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}";
-                window.open(url, "popupWindow", "width=1800,height=800,scrollbars=yes");
-            }
+          function openPopup() {
+            var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}"
+            window.open(url, 'popupWindow', 'width=1800,height=800,scrollbars=yes')
+          }
         </script>
-    </div>
-    
+      </div>
 
       <div style="padding: 20px;">
         <h2>Riviste eccellenti</h2>
 
+        <button onclick="openPopup2()" class="btn">Modifica riviste eccellenti</button>
 
-        
-          
-          <button onclick="openPopup2()" class="btn">Modifica riviste eccellenti</button>
-        
         <script>
           function openPopup2() {
-              var url = "{% url 'riviste_eccellenti' valutazione_nome=valutazione.nome %}";
-              window.open(url, "popupWindow", "width=1800,height=800,scrollbars=yes");
+            var url = "{% url 'riviste_eccellenti' valutazione_nome=valutazione.nome %}"
+            window.open(url, 'popupWindow', 'width=1800,height=800,scrollbars=yes')
           }
-      </script>
-
+        </script>
       </div>
-
     </div>
     <div style="padding-top: 80px;">
       {% if pubblicazioni %}
         <h2>Pubblicazioni</h2>
-        <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
-          <tr>
-            <td style="vertical-align: top; text-align: left;">
-              <b>Titolo</b>
-            </td>
-            <td style="vertical-align: top; text-align: left;">
-              <b>Anno di pubblicazione</b>
-            </td>
-            <td style="vertical-align: top; text-align: left;">
-              <b>Miglior quartile</b>
-            </td>
-            <td style="vertical-align: top; text-align: left;">
-              <b>Numero di coautori del dipartimento</b>
-            </td>
-            <td style="vertical-align: top; text-align: left;">
-              <b>Azioni</b>
-            </td>
-          </tr>
+        <table id="table-pubblicazioni" class="table table-bordered">
+          <thead>
+            <tr>
+              <th style="vertical-align: top; text-align: left;" data-orderable="true">
+                <b>Titolo</b>
+              </th>
+              <th data-orderable="true" style="vertical-align: top; text-align: left;">
+                <b>Anno di pubblicazione</b>
+              </th>
+              <th data-orderable="true" style="vertical-align: top; text-align: left;">
+                <b>Miglior quartile</b>
+              </th>
+              <th data-orderable="true" style="vertical-align: top; text-align: left;">
+                <b>Numero di coautori del dipartimento</b>
+              </th>
+              <th style="vertical-align: top; text-align: left;">
+                <b>Azioni</b>
+              </th>
+            </tr>
+          </thead>
           {% for pubblicazione in pubblicazioni %}
             <tr>
               <td>{{ pubblicazione.titolo }}</td>
