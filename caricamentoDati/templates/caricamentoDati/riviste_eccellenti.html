@@ -1,10 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'base_modal.html' %}
 {% block title %}
   Riviste Eccellenti
 {% endblock %}
 {% block content %}
-  <div class="main">
+  <div class="header">
     <h1>Riviste eccellenti per {{ valutazione.nome }}</h1>
+  </div> <div class="main">
     <div style="display: flex;">
       <div style="padding: 20px;">
         <h2>Cancella riviste</h2>
@@ -29,18 +30,20 @@
     <div style="padding-top: 80px;">
       {% if riviste %}
         <h2>Pubblicazioni</h2>
-        <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+        <table id="table-riviste-eccellenti" class="table table-bordered" style=" text-align: left; width: 100%;margin: 10px;" border="1" cellpadding="2" cellspacing="2">
+          <thead>
           <tr>
-            <td style="vertical-align: top; text-align: left;">
+            <th style="vertical-align: top; text-align: left;">
               <b>Titolo</b>
-            </td>
-            <td>
+            </th>
+            <th>
               <b>ISSN</b>
-            </td>
-            <td style="vertical-align: top; text-align: left;">
+            </th>
+            <th style="vertical-align: top; text-align: left;">
               <b>link</b>
-            </td>
+            </th>
           </tr>
+          </thead>
           {% for rivista in riviste %}
             <tr>
               <td>{{ rivista.nome }}</td>

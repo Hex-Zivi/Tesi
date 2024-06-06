@@ -2,46 +2,94 @@
 <html>
 
 <head>
-    <title>HTML Login Form</title>
-    <link rel="stylesheet" 
-          href="style.css">
+    <title>Login Pubblicazioni per Fondo FUR</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .main {
+            width: 50%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h3 {
+            text-align: center;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .wrap {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 
 <body>
     <div class="main">
-        <h1>GeeksforGeeks</h1>
-        <h3>Enter your login credentials</h3>
+        <h1>Login Pubblicazioni per Fondo FUR</h1>
+        <h3>Inserisci le tue credenziali di accesso</h3>
         <form method="post">
-                {% csrf_token %}
-            <label for="first">
-                  Username:
-              </label>
-            <input type="text" 
-                   id="username"
-                   name="username" 
-                   placeholder="Enter your Username" required>
-
-            <label for="password">
-                  Password:
-              </label>
-            <input type="password"
-                   id="password" 
-                   name="password" 
-                   placeholder="Enter your Password" required>
-
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Inserisci il tuo Username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Inserisci la tua Password" required>
+            </div>
             <div class="wrap">
-                <button type="submit"
-                        >
-                    Submit
-                </button>
+                <button type="submit">Accedi</button>
             </div>
         </form>
-        <p>Not registered? 
-              <a href="#" 
-               style="text-decoration: none;">
-                Create an account
-            </a>
-        </p>
     </div>
 </body>
 

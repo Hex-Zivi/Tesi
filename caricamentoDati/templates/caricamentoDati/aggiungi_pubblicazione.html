@@ -9,7 +9,11 @@
   <div class="main">
     <div class="container" style="padding: 20px;">
       <h2>Aggiungi pubblicazione</h2>
-      <form id="aggiungi_pubblicazione_form" method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome docente=docente caller=caller %}">
+      {% if docente_codice_fiscale != "admin" %}
+      <form id="aggiungi_pubblicazione_form" method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome docente=docente_codice_fiscale caller=caller %}">
+        {%else%}
+        <form id="aggiungi_pubblicazione_form" method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome docente=docente_codice_fiscale caller=caller %}">
+      {% endif %}
         {% csrf_token %}
         <div style="display: flex;">
           <div style="flex: 2;">

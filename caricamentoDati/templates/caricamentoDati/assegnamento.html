@@ -30,76 +30,31 @@
     </div>
 
 
-<!-- FORM PER L'AGGIUNTA DI UNA PUBBLICAZIONE
-      <div style="padding: 20px;">
-        <h2>Aggiungi pubblicazione</h2>
-        <form method="post" >
-          {% csrf_token %}
-          <div class="row">
-            <div class="col-md-6">
-              <label for="titolo">Titolo:</label><br>
-              <input type="text" id="titolo" name="titolo" required><br><br>
-      
-              <label for="anno_pubblicazione">Anno di pubblicazione:</label><br>
-              <input type="number" id="anno_pubblicazione" name="anno_pubblicazione" min="1000" max="9999" value="{{ current_year }}" required><br><br>
-      
-              <label for="issn_isbn">ISSN o ISBN:</label><br>
-              <input type="text" id="issn_isbn" name="issn_isbn"><br><br>
-      
-              <label for="doi">DOI:</label><br>
-              <input type="text" id="doi" name="doi"><br><br>
-            </div>
-            <div class="col-md-6">
-              <label for="tipologia_collezione">Tipologia della collezione:</label><br>
-              <input type="text" id="tipologia_collezione" name="tipologia_collezione" required><br><br>
-      
-              <label for="titolo_rivista_atti">Titolo della rivista o atti:</label><br>
-              <input type="text" id="titolo_rivista_atti" name="titolo_rivista_atti"><br><br>
-      
-              <label for="indicizzato_scopus">Indicizzato su Scopus:</label><br>
-              <input type="checkbox" id="indicizzato_scopus" name="indicizzato_scopus"><br><br>
-      
-              <label for="miglior_quartile">Miglior quartile:</label><br>
-              <input type="number" id="miglior_quartile" name="miglior_quartile" min="0" required><br><br>
-      
-              <label for="autori">Autori:</label><br>
-              <select id="autori" name="autori[]" multiple required>
-                {% for docente in lista_docenti %}
-                <option value="{{ docente.codiceFiscale }}">{{ docente.cognome_nome }}</option>
-                {% endfor %}
-              </select><br><br>
-            </div>
-          </div>
-      
-          <button class="btn" type="submit">Aggiungi</button>
-        </form>
-      </div>
--->
-    </div>
-
     <div style="display: flex; padding-top: 40px;">
-      <table style=" text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+      <table id="table-docenti" class="table table-bordered" style=" text-align: left; width: 100%;margin: 10px;" border="1" cellpadding="2" cellspacing="2">
+        <thead>
         <tr>
-          <td style="vertical-align: top; text-align: left;">
+          <th style="vertical-align: top; text-align: left;">
             <b>Cognome e Nome</b>
-          </td>
-          <td style="vertical-align: top; text-align: left;">
+          </th>
+          <th style="vertical-align: top; text-align: left;">
             <b>Numero di pubblicazioni richieste</b>
-          </td>
-          <td style="vertical-align: top; text-align: left;">
+          </th>
+          <th style="vertical-align: top; text-align: left;">
             <b>Numero di pubblicazioni assegnate</b>
-          </td>
-          <td style="vertical-align: top; text-align: left;">
+          </th>
+          <th style="vertical-align: top; text-align: left;">
             <b>Numero di pubblicazioni</b>
-          </td>
-          <td style="vertical-align: top; text-align: left;">
+          </th>
+          <th style="vertical-align: top; text-align: left;">
             <b>Quartili selezionati</b>
-          </td>
+          </th>
         </tr>
+        </thead>
         {% for docente in informazioni_docente.docenti_info %}
           <tr>
             <td>
-              <input type="checkbox" {% if docente.num_pubblicazioni_assegnate == docente.num_pubblicazioni_richieste or docente.num_pubblicazioni_assegnate == docente.pubblicazioni_totali and docente.pubblicazioni_totali < docente.num_pubblicazioni_richieste%}checked{% endif %} disabled>
+              <input type="checkbox" {% if docente.condizione_pubblicazioni %}checked{% endif %} disabled>
               &nbsp;
               <a href="{% url 'docente_pubblicazioni' valutazione.nome docente.codice_fiscale %}">{{ docente.cognome_nome }}</a>
             </td>
@@ -114,7 +69,7 @@
   </div>
   <script>
   function loadModalContent() {
-    var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}"
+    var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='assegnamento' docente='admin' %}"
     fetch(url, {
       headers: {
         'X-Requested-With': 'XMLHttpRequest'

@@ -227,6 +227,7 @@ def cancella_pubblicazione_singola(request, pubblicazione_titolo, valutazione_no
 
 def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    docente_chiamante = docente
     if docente != 'admin':
         docente = Docente.objects.get(codiceFiscale=docente)
         form = FormAggiungiPubblicazione(
@@ -239,6 +240,7 @@ def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
         'caller': caller,
         'docente': docente,
         'form_aggiungi_pubblicazione': form,
+        'docente_codice_fiscale': docente_chiamante,
     }
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -251,10 +253,11 @@ def aggiungi_pubblicazione_pagina(request, valutazione_nome, caller, docente):
 
 def aggiungi_pubblicazione(request, valutazione_nome, docente, caller):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    docente_chiamante = ''
     if docente != 'admin':
-        docente = Docente.objects.get(codiceFiscale=docente)
+        docente_chiamante = Docente.objects.get(codiceFiscale=docente)
         form = FormAggiungiPubblicazione(
-            initial={'autori': [docente.codiceFiscale]})
+            initial={'autori': [docente_chiamante.codiceFiscale]})
     else:
         form = FormAggiungiPubblicazione()
 
@@ -282,9 +285,20 @@ def aggiungi_pubblicazione(request, valutazione_nome, docente, caller):
                     autore=docente, pubblicazione=nuova_pubblicazione)
                 nuova_relazione.save()
 
+
             if caller == "modifica":
                 return redirect('modifica_valutazione', valutazione)
-
+            
+            elif caller == "assegnamento":
+                return redirect('assegnamento', valutazione_nome)
+            
+            elif caller == "docente_pubblicazione":
+                if docente_chiamante:
+                    return redirect('docente_pubblicazioni', valutazione_nome, docente_chiamante.codiceFiscale)
+            
+            else:
+                return redirect('valutazioni')
+            
         else:
             form = FormAggiungiPubblicazione(request.POST)
 
@@ -314,6 +328,9 @@ def assegnamento(request, valutazione_nome):
         pubblicazioni_totali = relazioni_docente_pubblicazione.filter(
             autore=docente).count()
         formatted_quartili = sorted(['Q{}'.format(q) for q in quartili])
+        condizione_pubblicazioni=0
+        if num_pubblicazioni_assegnate == num_pubblicazioni_richieste or (num_pubblicazioni_assegnate == pubblicazioni_totali and pubblicazioni_totali < num_pubblicazioni_richieste):
+            condizione_pubblicazioni=1
 
         docente_info = {
             'codice_fiscale': docente.codiceFiscale,
@@ -321,7 +338,8 @@ def assegnamento(request, valutazione_nome):
             'num_pubblicazioni_richieste': num_pubblicazioni_richieste,
             'num_pubblicazioni_assegnate': num_pubblicazioni_assegnate,
             'pubblicazioni_totali': pubblicazioni_totali,
-            'quartili': formatted_quartili
+            'quartili': formatted_quartili,
+            'condizione_pubblicazioni': condizione_pubblicazioni
 
         }
 
@@ -369,9 +387,12 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
         pubblicazioni_info.append(pubblicazione_info)
 
     context = {'valutazione': valutazione,
+               'num_pubblicazioni': valutazione.numeroPubblicazioni,
                'docente': docente,
                'docente_codice_fiscale': docente.codiceFiscale,
                'pubblicazioni_info': pubblicazioni_info}
+    
+    print(docente.codiceFiscale)
     return render(request, 'caricamentoDati/docente_pubblicazioni.html', context)
 
 

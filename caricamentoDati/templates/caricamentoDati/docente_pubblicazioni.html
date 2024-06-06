@@ -5,6 +5,7 @@ Vista pubblicazioni del docente
 {% block content %}
 <div class="main">
   <h1>Pubblicazioni di {{ docente.cognome_nome }} per {{ valutazione.nome }}, {{ valutazione.anno }}</h1>
+  <h3>Pubblicazioni da selezionare: {{ num_pubblicazioni }}</h3>
   <br/>
   <div style="padding: 20px;">
     <div style="padding: 20px;">
@@ -13,19 +14,21 @@ Vista pubblicazioni del docente
     </div>
 </div>
 </div>
+{% if pubblicazioni_info %}
   <div style="display: flex; padding-top: 40px;">
     <form id="selezioneForm" method="post" style="display: inline;" action="{% url 'salva_selezioni' valutazione.nome docente_codice_fiscale %}">
       {% csrf_token %}
-      <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+      <table id="table-docente-pubblicazione" class="table table-bordered" style=" text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+        <thead>
         <tr>
-          <td style="vertical-align: top; text-align: left;"><b>Titolo</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Anno di pubblicazione</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Tipologia collezzione</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Titolo rivista o atti</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Autori</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Selezionato da</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Quartile</b></td>
-          <td style="vertical-align: top; text-align: left;"><b>Selezione</b></td>
+          <th style="vertical-align: top; text-align: left;"><b>Titolo</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Anno di pubblicazione</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Tipologia collezzione</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Titolo rivista o atti</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Autori</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Selezionato da</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Quartile</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Selezione</b></th>
         </tr>
         {% for pubblicazione in pubblicazioni_info %}
         <tr>
@@ -55,6 +58,9 @@ Vista pubblicazioni del docente
     </form>
     
   </div>
+  {%else%}
+  <p>Non ci sono pubblicazioni</p>
+  {% endif %}
 </div>
 
 <script>
@@ -86,7 +92,7 @@ Vista pubblicazioni del docente
 
   
     function loadModalContent() {
-      var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}"
+      var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='docente_pubblicazione' docente=docente_codice_fiscale %}"
       fetch(url, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
