@@ -6,7 +6,7 @@
   <div style="display: flex;">
     <div style="flex: 3; padding: 20px;">
       <h1>Valutazioni</h1>
-      <table class="table table-bordered">
+      <table class="table table-bordered" border="1">
         <thead>
           <tr>
             <th style="vertical-align: top; text-align: left;">
@@ -49,7 +49,7 @@
               </td>
               <td style="vertical-align: top; text-align: left;">
                 {% if user.is_staff %}
-                  <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                  <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline; margin-bottom: 10px;">
                     {% csrf_token %}
                     <button type="submit" class="btn">Modifica</button>
                   </form>
@@ -60,8 +60,51 @@
                   </form>
 
                   <button type="button" class="btn" data-toggle="modal" data-target="#confirmDeleteModal" data-valutazione="{{ valutazione.nome }}">Cancella</button>
+                  <!-- Modale di conferma cancellazione -->
+                  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="confirmDeleteModalLabel">Conferma Cancellazione</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">Sei sicuro di voler cancellare la valutazione?</div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                          <form id="deleteForm" action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Conferma</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                   <button type="button" class="btn" data-toggle="modal" data-target="#confirmCloseModal" data-valutazione="{{ valutazione.nome }}">Chiudi</button>
+                  <!-- Modale di conferma chiusura -->
+                  <div class="modal fade" id="confirmCloseModal" tabindex="-1" role="dialog" aria-labelledby="confirmCloseModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="confirmCloseModalLabel">Conferma Chiusura</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">Vuoi confermare la selezione delle pubblicazioni?</div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                          <form id="closeForm" action="{% url 'chiudi_valutazione' valutazione.nome %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Conferma</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <form action="{% url 'selezioni' valutazione.nome %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Visualizza Selezioni</button>
+                  </form>
                 {% else %}
                   <form action="{% url 'docente_pubblicazioni' valutazione.nome cf %}" method="post" style="display: inline;">
                     {% csrf_token %}
@@ -114,46 +157,6 @@
         }
       </style>
     {% endif %}
-  </div>
-
-  <!-- Modale di conferma cancellazione -->
-  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="confirmDeleteModalLabel">Conferma Cancellazione</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-        <div class="modal-body">Sei sicuro di voler cancellare la valutazione?</div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
-          <form id="deleteForm" action="" method="post" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Conferma</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modale di conferma chiusura -->
-  <div class="modal fade" id="confirmCloseModal" tabindex="-1" role="dialog" aria-labelledby="confirmCloseModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="confirmCloseModalLabel">Conferma Chiusura</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-        <div class="modal-body">Vuoi confermare la selezione delle pubblicazioni?</div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
-          <form id="closeForm" action="" method="post" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Conferma</button>
-          </form>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script>

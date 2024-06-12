@@ -12,7 +12,7 @@ Vista pubblicazioni del docente
       <h2>Aggiungi pubblicazione</h2>
       <button type="button" class="btn" data-toggle="modal" data-target="#aggiungiPubblicazioneModal" onclick="loadModalContent()">Aggiungi pubblicazione</button>
     </div>
-</div>
+
 </div>
 {% if pubblicazioni_info %}
   <div style="display: flex; padding-top: 40px;">
@@ -23,8 +23,12 @@ Vista pubblicazioni del docente
         <tr>
           <th style="vertical-align: top; text-align: left;"><b>Titolo</b></th>
           <th style="vertical-align: top; text-align: left;"><b>Anno di pubblicazione</b></th>
-          <th style="vertical-align: top; text-align: left;"><b>Tipologia collezzione</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Handle</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Tipologia collezione</b></th>
           <th style="vertical-align: top; text-align: left;"><b>Titolo rivista o atti</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>ISSN/ISBN</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>DOI</b></th>
+          <th style="vertical-align: top; text-align: left;"><b>Indicizzato Scopus</b></th>
           <th style="vertical-align: top; text-align: left;"><b>Autori</b></th>
           <th style="vertical-align: top; text-align: left;"><b>Selezionato da</b></th>
           <th style="vertical-align: top; text-align: left;"><b>Quartile</b></th>
@@ -35,8 +39,12 @@ Vista pubblicazioni del docente
           <td>{{ pubblicazione.titolo }}</td>
           <input type="hidden" name="titolo_pubblicazione[]" value="{{ pubblicazione.titolo }}">
           <td>{{pubblicazione.anno}}</td>
+          <td>{{pubblicazione.handle}}</td>
           <td>{{pubblicazione.tipologia}}</td>
           <td>{{pubblicazione.rivista}}</td>
+          <td>{{pubblicazione.issn_isbn}}</td>
+          <td>{{pubblicazione.doi}}</td>
+          <td>{{pubblicazione.scopus}}</td>
           <td>
             {% for autore in pubblicazione.altri_autori %}
             {{ autore }}{% if not forloop.last %}, {% endif %}

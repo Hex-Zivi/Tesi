@@ -10,21 +10,18 @@
         <h2>Cancella tutte le pubblicazioni</h2>
         <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confermaCancellazioneModal">Cancella</button>
       </div>
-      
 
       <div id="confermaCancellazioneModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalConfermaCancellazioneLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
+        <div class="modal-dialog" role="document"  style="max-width: 60%; margin: 30px auto;">
+          <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
               <h5 class="modal-title" id="modalConfermaCancellazioneLabel">Conferma cancellazione</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
-            <div class="modal-body">
-              Sei sicuro di voler cancellare tutte le pubblicazioni?
-            </div>
+            <div class="modal-body">Sei sicuro di voler cancellare tutte le pubblicazioni?</div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
-              <form method="post" action="{% url 'cancella_pubblicazioni_tot' valutazione.nome %}">
+              <form method="post" style="display: inline;" action="{% url 'cancella_pubblicazioni_tot' valutazione.nome %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary">Conferma</button>
               </form>
@@ -32,7 +29,6 @@
           </div>
         </div>
       </div>
-
 
       <div style="padding: 20px;">
         <h2>Carica pubblicazioni</h2>
@@ -50,8 +46,6 @@
         <h2>Aggiungi pubblicazione</h2>
         <button type="button" class="btn" data-toggle="modal" data-target="#aggiungiPubblicazioneModal" onclick="loadModalContent()">Aggiungi pubblicazione</button>
       </div>
-
-      
 
       <div style="padding: 20px;">
         <h2>Riviste eccellenti</h2>
@@ -104,7 +98,7 @@
               <td>{{ pubblicazione.miglior_quartile }}</td>
               <td>{{ pubblicazione.num_coautori_dip }}</td>
               <td>
-                <div type="button" >
+                <div type="button">
                   <form method="post" action="{% url 'cancella_pubblicazione_singola' valutazione_nome=valutazione.nome pubblicazione_titolo=pubblicazione.titolo %}">
                     {% csrf_token %}
                     <button class="btn" type="submit">Cancella</button>

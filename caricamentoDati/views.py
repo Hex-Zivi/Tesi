@@ -50,8 +50,9 @@ def admin_required(view_func):
 
 @login_required
 def valutazioni(request):
-    context = {'valutazioni': Valutazione.objects.all().order_by('anno'),
-               'cf': request.user.codice_fiscale
+    context = {'valutazioni': Valutazione.objects.all().order_by('-anno'),
+               'cf': request.user.codice_fiscale,
+               'is_superuser': request.user.is_superuser,
                }
     return render(request, "caricamentoDati/valutazioni.html", context)
 
@@ -285,20 +286,19 @@ def aggiungi_pubblicazione(request, valutazione_nome, docente, caller):
                     autore=docente, pubblicazione=nuova_pubblicazione)
                 nuova_relazione.save()
 
-
             if caller == "modifica":
                 return redirect('modifica_valutazione', valutazione)
-            
+
             elif caller == "assegnamento":
                 return redirect('assegnamento', valutazione_nome)
-            
+
             elif caller == "docente_pubblicazione":
                 if docente_chiamante:
                     return redirect('docente_pubblicazioni', valutazione_nome, docente_chiamante.codiceFiscale)
-            
+
             else:
                 return redirect('valutazioni')
-            
+
         else:
             form = FormAggiungiPubblicazione(request.POST)
 
@@ -328,9 +328,9 @@ def assegnamento(request, valutazione_nome):
         pubblicazioni_totali = relazioni_docente_pubblicazione.filter(
             autore=docente).count()
         formatted_quartili = sorted(['Q{}'.format(q) for q in quartili])
-        condizione_pubblicazioni=0
+        condizione_pubblicazioni = 0
         if num_pubblicazioni_assegnate == num_pubblicazioni_richieste or (num_pubblicazioni_assegnate == pubblicazioni_totali and pubblicazioni_totali < num_pubblicazioni_richieste):
-            condizione_pubblicazioni=1
+            condizione_pubblicazioni = 1
 
         docente_info = {
             'codice_fiscale': docente.codiceFiscale,
@@ -352,8 +352,6 @@ def assegnamento(request, valutazione_nome):
 
 
 def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
-    print(request.user.codice_fiscale)
-    print(docente_codice_fiscale)
     docente_cf = request.session.get('codice_fiscale')
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
@@ -381,7 +379,11 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
             'altri_autori': altri_autori,
             'altri_autori_scelta': altri_autori_scelta,
             'valore_scelta': valore_scelta,
-            'quartile': quartile
+            'quartile': quartile,
+            'doi': pubblicazione.doi,
+            'issn_isbn': pubblicazione.issn_isbn,
+            'handle': pubblicazione.handle,
+            'scopus': pubblicazione.indicizzato_scopus,
         }
 
         pubblicazioni_info.append(pubblicazione_info)
@@ -391,8 +393,7 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
                'docente': docente,
                'docente_codice_fiscale': docente.codiceFiscale,
                'pubblicazioni_info': pubblicazioni_info}
-    
-    print(docente.codiceFiscale)
+
     return render(request, 'caricamentoDati/docente_pubblicazioni.html', context)
 
 
@@ -419,7 +420,7 @@ def assegnamento_algoritmo(request, valutazione_nome):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     numero_selezioni_valutazione = valutazione.numeroPubblicazioni
     pubblicazioni = PubblicazionePresentata.objects.filter(
-        valutazione=valutazione)
+        valutazione=valutazione).order_by('miglior_quartile')
     relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
         pubblicazione__valutazione=valutazione)
     docenti = Docente.objects.annotate(num_relazioni=Count(
@@ -445,12 +446,11 @@ def assegnamento_algoritmo(request, valutazione_nome):
             lista_issn = rivista.issn1, rivista.issn2
         else:
             lista_issn = rivista.issn1
-        # print("Per la rivista:" + rivista.nome)
+
         for issn in lista_issn:
             pubblicazioni_rivista = pubblicazioni.filter(
                 issn_isbn=issn)
             for pubblicazione in pubblicazioni_rivista:
-                print("pubblicazione:" + pubblicazione.titolo)
 
                 if pubblicazione.num_coautori_dip == 1:
                     relazione = RelazioneDocentePubblicazione.objects.get(
@@ -561,10 +561,6 @@ def assegnamento_algoritmo(request, valutazione_nome):
                                 progresso = 1
                                 break
 
-    print("LISTA DOCENTI: ")
-    for docente in docenti:
-        print(docente)
-
     valutazione.status = "Assegnamento calcolato"
     valutazione.save()
 
@@ -673,9 +669,6 @@ def carica_riviste(request, valutazione_nome):
                     issn1 = issn_list[0] if issn_list else ''
                     issn2 = issn_list[1] if len(issn_list) > 1 else ''
 
-                    print(f"ISSN 1: {issn1}")
-                    print(f"ISSN 2: {issn2}")
-
                     if not RivistaEccellente.objects.filter(valutazione=valutazione, nome=nome).exists():
                         RivistaEccellente.objects.create(
                             valutazione=valutazione,
@@ -685,7 +678,7 @@ def carica_riviste(request, valutazione_nome):
                             issn2=issn2
                         )
 
-    return redirect('riviste_eccellenti', valutazione)
+    return redirect('modifica_valutazione', valutazione)
 
 
 def cancella_riviste(request, valutazione_nome):
@@ -695,3 +688,24 @@ def cancella_riviste(request, valutazione_nome):
     for rivista in riviste:
         rivista.delete()
     return redirect('riviste_eccellenti', valutazione)
+
+
+def visualizza_selezioni(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    selezioni_per_autore = {}
+
+    # Ottieni tutti i docenti associati alla valutazione
+    docenti = Docente.objects.all().order_by('cognome_nome')
+
+    # Per ogni docente, ottieni le pubblicazioni con scelta=1
+    for docente in docenti:
+        pubblicazioni_selezionate = RelazioneDocentePubblicazione.objects.filter(
+            autore=docente, pubblicazione__valutazione=valutazione, scelta=1).select_related('pubblicazione')
+        selezioni_per_autore[docente] = pubblicazioni_selezionate
+
+    context = {
+        'valutazione': valutazione,
+        'selezioni_per_autore': selezioni_per_autore
+    }
+
+    return render(request, 'caricamentoDati/selezioni.html', context)

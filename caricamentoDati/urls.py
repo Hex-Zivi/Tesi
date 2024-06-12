@@ -64,4 +64,7 @@ urlpatterns = [
     re_path('^chiudi valutazione/(?P<valutazione_nome>.*)/$', views.chiudi_valutazione,
             name='chiudi_valutazione'),
 
+    re_path('^selezioni/(?P<valutazione_nome>.*)/$', views.visualizza_selezioni,
+            name='selezioni'),
+
 ]
