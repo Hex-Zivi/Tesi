@@ -354,7 +354,13 @@ def assegnamento(request, valutazione_nome):
 def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
     docente_cf = request.session.get('codice_fiscale')
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
-    docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
+    try:
+        docente = Docente.objects.get(codiceFiscale=docente_cf)
+    except Docente.DoesNotExist:
+        docente_nome = str(request.session.get('last_name')) + " " + str(request.session.get('first_name'))
+        docente = Docente(cognome_nome = docente_nome, codiceFiscale = docente_cf)
+        docente.save()
+    
     relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
         pubblicazione__valutazione=valutazione, autore=docente)
 

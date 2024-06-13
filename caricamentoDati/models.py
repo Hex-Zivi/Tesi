@@ -75,7 +75,7 @@ class Docente(models.Model):
         max_length=16, primary_key=True, default='RSSMRA80L05F593A', verbose_name="codice fiscale")
 
     cognome_nome = models.CharField(
-        max_length=40, verbose_name="cognome e nome")
+        max_length=100, verbose_name="cognome e nome")
 
     def __str__(self):
         return self.cognome_nome.upper()
@@ -90,10 +90,10 @@ class RivistaEccellente(models.Model):
 
     valutazione = models.ForeignKey(
         Valutazione, on_delete=models.CASCADE, default='_')
-    issn1 = models.CharField(max_length=30, null=True, blank=True)
-    issn2 = models.CharField(max_length=30, null=True, blank=True)
+    issn1 = models.CharField(max_length=60, null=True, blank=True)
+    issn2 = models.CharField(max_length=60, null=True, blank=True)
     nome = models.CharField(max_length=60)
-    link = models.CharField(max_length=200, blank=False,
+    link = models.CharField(max_length=300, blank=False,
                             null=False, default='_')
 
     def __str__(self):
@@ -104,19 +104,19 @@ class RivistaEccellente(models.Model):
 
 
 class PubblicazionePresentata(models.Model):
-    handle = models.CharField(max_length=30, primary_key=True)
+    handle = models.CharField(max_length=60, primary_key=True)
     valutazione = models.ForeignKey(
         Valutazione, on_delete=models.CASCADE, null=True, blank=True)
     issn_isbn = models.CharField(
         max_length=30, null=True, blank=True, verbose_name="issn o isbn")
     anno_pubblicazione = models.IntegerField(validators=[MinValueValidator(1000), MaxValueValidator(
         9999)], default=datetime.date.today().year, verbose_name="anno di pubblicazione")
-    doi = models.CharField(max_length=30, null=True, blank=True)
-    titolo = models.CharField(max_length=200)
+    doi = models.CharField(max_length=60, null=True, blank=True)
+    titolo = models.CharField(max_length=500)
     tipologia_collezione = models.CharField(
-        max_length=100, verbose_name="tipologia della collezione")
+        max_length=500, verbose_name="tipologia della collezione")
     titolo_rivista_atti = models.CharField(
-        max_length=200, null=True, verbose_name="titolo della rivista o atti")
+        max_length=500, null=True, verbose_name="titolo della rivista o atti")
     indicizzato_scopus = models.BooleanField(default=False)
     miglior_quartile = models.IntegerField(blank=True, default=0, validators=[
         MinValueValidator(0)], verbose_name="miglior quartile")
