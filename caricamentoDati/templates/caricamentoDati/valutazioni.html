@@ -103,7 +103,7 @@
 
                   <form action="{% url 'selezioni' valutazione.nome %}" method="post" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn">Visualizza Selezioni</button>
+                    <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Visualizza Selezioni</button>
                   </form>
                 {% else %}
                   <form action="{% url 'docente_pubblicazioni' valutazione.nome cf %}" method="post" style="display: inline;">

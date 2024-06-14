@@ -185,7 +185,8 @@ def cancella_pubblicazioni_tot(request, valutazione_nome):
 
 def cancella_pubblicazione_singola(request, valutazione_nome, pubblicazione_slug):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
-    PubblicazionePresentata.objects.get(valutazione=valutazione, slug=pubblicazione_slug).delete()
+    PubblicazionePresentata.objects.get(
+        valutazione=valutazione, slug=pubblicazione_slug).delete()
     return redirect('modifica_valutazione', valutazione)
 # ===================== MODIFICA ====================
 
@@ -571,15 +572,16 @@ def azzera_assegnamento(request, valutazione_nome):
 
 # =================== DOCENTE-PUBBLICAZIONI ====================
 def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
-    docente_cf = request.session.get('codice_fiscale')
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     try:
-        docente = Docente.objects.get(codiceFiscale=docente_cf)
+        docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
     except Docente.DoesNotExist:
-        docente_nome = str(request.session.get('last_name')).upper(
-        ) + " " + str(request.session.get('first_name')).upper()
-        docente = Docente(cognome_nome=docente_nome, codiceFiscale=docente_cf)
-        docente.save()
+            print("creazione utente")
+            docente_nome = request.user.last_name.upper(
+            ) + " " + request.user.first_name.upper()
+            docente = Docente(cognome_nome=docente_nome,
+                              codiceFiscale=docente_codice_fiscale)
+            docente.save()
 
     relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
         pubblicazione__valutazione=valutazione, autore=docente)
@@ -590,10 +592,10 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
         pubblicazione = relazione.pubblicazione
         altri_autori = [autore.cognome_nome for autore in Docente.objects.filter(
             relazionedocentepubblicazione__pubblicazione=pubblicazione
-        ).exclude(codiceFiscale=docente_cf).distinct()]
+        ).exclude(codiceFiscale=docente.codiceFiscale).distinct()]
         altri_autori_scelta = [autore.cognome_nome for autore in Docente.objects.filter(
             relazionedocentepubblicazione__pubblicazione=pubblicazione, relazionedocentepubblicazione__scelta__gt=0
-        ).exclude(codiceFiscale=docente_cf).distinct()]
+        ).exclude(codiceFiscale=docente.codiceFiscale).distinct()]
         valore_scelta = relazione.scelta
         quartile = pubblicazione.miglior_quartile
 

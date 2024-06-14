@@ -22,14 +22,19 @@ def login_view(request):
         username = request.POST['username']
         pswrd = request.POST['password']
 
+        print(username)
+        print(pswrd)
+        
         ldap_backend = LDAPBackend()
         user = ldap_backend.authenticate(request, username=username, password=pswrd)
         request.user
         print(user)
 
+
+
         # Da controllare
-        user_attrs = user.ldap_user._user_attrs._data['objectclass']
-        user.ruolo = 'admin' if 'univrUtente' in user_attrs else 'user'
+        #user_attrs = user.ldap_user._user_attrs._data['objectclass']
+        #user.ruolo = 'admin' if 'univrUtente' in user_attrs else 'user'
         # // Da controllare
 
         if user is not None:
