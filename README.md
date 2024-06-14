@@ -12,6 +12,6 @@ I punti principali che sono stati richiesti sono stati:
 Guida su come installare il progetto e preparare l'ambiente di sviluppo. Includi prerequisiti, istruzioni di installazione e configurazione.
 
 ```bash
-git clone https://github.com/utente/nome-progetto.git
-cd nome-progetto
+git clone https://github.com/Hex-Zivi/FUR.git
+cd FUR
 comando-per-installazione
