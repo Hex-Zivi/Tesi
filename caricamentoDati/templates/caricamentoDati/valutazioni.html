@@ -51,15 +51,15 @@
                 {% if user.is_staff %}
                   <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline; margin-bottom: 10px;">
                     {% csrf_token %}
-                    <button type="submit" class="btn">Modifica</button>
+                    <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Modifica</button>
                   </form>
 
                   <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn">Assegna Pubblicazioni</button>
+                    <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Assegna Pubblicazioni</button>
                   </form>
 
-                  <button type="button" class="btn" data-toggle="modal" data-target="#confirmDeleteModal" data-valutazione="{{ valutazione.nome }}">Cancella</button>
+                  <button type="button" class="btn" data-toggle="modal" data-target="#confirmDeleteModal" data-valutazione="{{ valutazione.nome }}" style="display: inline; margin-bottom: 10px;">Cancella</button>
                   <!-- Modale di conferma cancellazione -->
                   <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -70,7 +70,7 @@
                         </div>
                         <div class="modal-body">Sei sicuro di voler cancellare la valutazione?</div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
                           <form id="deleteForm" action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">Conferma</button>
@@ -80,7 +80,7 @@
                     </div>
                   </div>
 
-                  <button type="button" class="btn" data-toggle="modal" data-target="#confirmCloseModal" data-valutazione="{{ valutazione.nome }}">Chiudi</button>
+                  <button type="button" class="btn" data-toggle="modal" data-target="#confirmCloseModal" data-valutazione="{{ valutazione.nome }}" style="display: inline; margin-bottom: 10px;">Chiudi</button>
                   <!-- Modale di conferma chiusura -->
                   <div class="modal fade" id="confirmCloseModal" tabindex="-1" role="dialog" aria-labelledby="confirmCloseModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -91,7 +91,7 @@
                         </div>
                         <div class="modal-body">Vuoi confermare la selezione delle pubblicazioni?</div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
                           <form id="closeForm" action="{% url 'chiudi_valutazione' valutazione.nome %}" method="post" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">Conferma</button>

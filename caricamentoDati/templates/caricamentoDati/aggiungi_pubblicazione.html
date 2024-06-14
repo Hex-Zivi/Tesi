@@ -1,57 +1,85 @@
 {% extends 'base_modal.html' %}
+
 {% block title %}
-  Assegnamento delle Pubblicazioni
+  Aggiungi Pubblicazione
 {% endblock %}
+
 {% block content %}
   <div class="header">
     <h1>Crea nuova Pubblicazione per {{ valutazione.nome }}</h1>
   </div>
+
   <div class="main">
     <div class="container" style="padding: 20px;">
       <h2>Aggiungi pubblicazione</h2>
       <form id="aggiungi_pubblicazione_form" method="post" action="{% url 'aggiungi_pubblicazione' valutazione_nome=valutazione.nome docente=docente_codice_fiscale caller=caller %}">
-       {% csrf_token %}
+        {% csrf_token %}
         <div style="display: flex;">
           <div style="flex: 2;">
-            <div class="form-group">{{ form_aggiungi_pubblicazione.handle.label_tag }}
-              {{ form_aggiungi_pubblicazione.handle }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.titolo.label_tag }}
-              {{ form_aggiungi_pubblicazione.titolo }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.anno_pubblicazione.label_tag }}
-              {{ form_aggiungi_pubblicazione.anno_pubblicazione }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.miglior_quartile.label_tag }}
-              {{ form_aggiungi_pubblicazione.miglior_quartile }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.issn_isbn.label_tag }}
-              {{ form_aggiungi_pubblicazione.issn_isbn }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.doi.label_tag }}
-              {{ form_aggiungi_pubblicazione.doi }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.tipologia_collezione.label_tag }}
-              {{ form_aggiungi_pubblicazione.tipologia_collezione }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.titolo_rivista_atti.label_tag }}
-              {{ form_aggiungi_pubblicazione.titolo_rivista_atti }}</div>
-            <div class="form-group">{{ form_aggiungi_pubblicazione.indicizzato_scopus.label_tag }}
-              {{ form_aggiungi_pubblicazione.indicizzato_scopus }}</div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.handle.label_tag }}
+              {{ form_aggiungi_pubblicazione.handle }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.titolo.label_tag }}
+              {{ form_aggiungi_pubblicazione.titolo }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.anno_pubblicazione.label_tag }}
+              {{ form_aggiungi_pubblicazione.anno_pubblicazione }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.miglior_quartile.label_tag }}
+              {{ form_aggiungi_pubblicazione.miglior_quartile }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.issn_isbn.label_tag }}
+              {{ form_aggiungi_pubblicazione.issn_isbn }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.doi.label_tag }}
+              {{ form_aggiungi_pubblicazione.doi }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.tipologia_collezione.label_tag }}
+              {{ form_aggiungi_pubblicazione.tipologia_collezione }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.titolo_rivista_atti.label_tag }}
+              {{ form_aggiungi_pubblicazione.titolo_rivista_atti }}
+            </div>
+            <div class="form-group">
+              {{ form_aggiungi_pubblicazione.indicizzato_scopus.label_tag }}
+              {{ form_aggiungi_pubblicazione.indicizzato_scopus }}
+            </div>
           </div>
 
           <div style="flex: 2;">
+            <div class="form-group">
               {{ form_aggiungi_pubblicazione.autori.label_tag }}
-              <div class="form-group" style="max-height: 400px; overflow-y: auto;">
-              {{ form_aggiungi_pubblicazione.autori }}</div>
+              <div style="max-height: 400px; overflow-y: auto;">
+                {{ form_aggiungi_pubblicazione.autori }}
+              </div>
+            </div>
           </div>
-          <div style="flex: 1;">
-            <button class="btn btn-primary" type="submit">Aggiungi</button>
-          </div>
+
+          <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end;">
+            <button class="btn btn-primary" type="submit" style="padding: 10px 20px; font-size: 24px; border: none; border-radius: 4px; margin-top: auto; margin-bottom: auto;">
+              Aggiungi
+            </button>
+          </div>        
         </div>
       </form>
     </div>
   </div>
 
+  <!-- Script per gestire l'invio del form tramite AJAX -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var form = document.querySelector('#aggiungi_pubblicazione_form')
+      var form = document.querySelector('#aggiungi_pubblicazione_form');
       form.addEventListener('submit', function (event) {
-        event.preventDefault() // Previeni il comportamento predefinito della form
-    
+        event.preventDefault(); // Previeni il comportamento predefinito della form
+
         // Effettua una richiesta AJAX per aggiungere la pubblicazione
         fetch(form.action, {
           method: 'POST',
@@ -63,18 +91,19 @@
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              // Se l'aggiunta della pubblicazione è avvenuta con successo, chiudi la finestra corrente
-              $('#aggiungiPubblicazioneModal').modal('hide')
-              location.reload() // Opzionale: Ricarica la pagina o aggiorna la tabella con i nuovi dati
+              // Se l'aggiunta della pubblicazione è avvenuta con successo, chiudi la finestra modale corrente
+              $('#aggiungiPubblicazioneModal').modal('hide');
+              location.reload(); // Opzionale: Ricarica la pagina o aggiorna la tabella con i nuovi dati
             } else {
               // Gestisci eventuali errori o altre situazioni qui
-              console.error("Errore durante l'aggiunta della pubblicazione")
+              console.error("Errore durante l'aggiunta della pubblicazione");
             }
           })
           .catch((error) => {
-            console.error('Si è verificato un errore:', error)
-          })
-      })
-    })
+            console.error('Si è verificato un errore:', error);
+          });
+      });
+    });
   </script>
 {% endblock %}
+
