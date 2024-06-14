@@ -19,22 +19,19 @@ import requests
 from bs4 import BeautifulSoup
 
 
-
 def is_admin(user):
     # Esempio: verifica se l'utente è autenticato e ha il ruolo di amministratore
     return user.is_authenticated and user.is_staff
 
 
-# Decoratore per verificare se l'utente è un amministratore
+# Aggiunge un decoratore @admin_required
 def admin_required(view_func):
     decorated_view_func = user_passes_test(
         is_admin,
         login_url='/login/',  # URL della pagina di login
-        # Reindirizza all'URL di login senza salvare l'URL di destinazione
         redirect_field_name=None
     )(view_func)
     return decorated_view_func
-# Aggiunge un decoratore @admin_required
 
 
 @login_required
@@ -44,23 +41,6 @@ def valutazioni(request):
                'is_superuser': request.user.is_superuser,
                }
     return render(request, "caricamentoDati/valutazioni.html", context)
-
-
-def valutazione(request, pk):
-    try:
-        valutazione = Valutazione.objects.get(pk=pk)
-        return HttpResponse(f'"{valutazione.nome}" caricata il {valutazione.dataCaricamento}, {valutazione.status}<br>')
-    except Valutazione.DoesNotExist:
-        return HttpResponse(f'Valutazione chiamata "{pk}" inesistente')
-
-
-def valutazione_per_anno(request, mese, anno):
-    valutazioni = Valutazione.objects.filter(dataCaricamento__year=int(anno))
-    valutazioni = valutazioni.filter(dataCaricamento__month=int(mese))
-    elenco = ""
-    for valutazione in valutazioni.order_by("anno"):
-        elenco += (f'"{valutazione.nome}" caricata il {valutazione.dataCaricamento}, {valutazione.status}<br>')
-    return HttpResponse(elenco)
 
 
 def caricamento(request):
