@@ -1,42 +1,31 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
-import csv
-import datetime
-from django.db import transaction
-
 from django.shortcuts import render, redirect
-
-# Create your views here.
-from django.http import HttpResponse
-
-from .models import *
+from django.db import transaction
 from django.db.models import Count
-from .forms import *
-
-import openpyxl
-
-
-from django_auth_ldap.backend import LDAPBackend  # Greyed out
-from django.contrib.auth.decorators import login_required
-
-
-from pdb import set_trace
-from django.contrib.auth.decorators import user_passes_test
-
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
 
+import csv
+import datetime
+import openpyxl
+import re
+
+from .models import *
+from .forms import *
+
+from django_auth_ldap.backend import LDAPBackend
 import requests
 from bs4 import BeautifulSoup
-import re
+
 
 
 def is_admin(user):
     # Esempio: verifica se l'utente è autenticato e ha il ruolo di amministratore
     return user.is_authenticated and user.is_staff
 
+
 # Decoratore per verificare se l'utente è un amministratore
-
-
 def admin_required(view_func):
     decorated_view_func = user_passes_test(
         is_admin,
@@ -357,10 +346,11 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
     try:
         docente = Docente.objects.get(codiceFiscale=docente_cf)
     except Docente.DoesNotExist:
-        docente_nome = str(request.session.get('last_name')) + " " + str(request.session.get('first_name'))
-        docente = Docente(cognome_nome = docente_nome, codiceFiscale = docente_cf)
+        docente_nome = str(request.session.get('last_name')) + \
+            " " + str(request.session.get('first_name'))
+        docente = Docente(cognome_nome=docente_nome, codiceFiscale=docente_cf)
         docente.save()
-    
+
     relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
         pubblicazione__valutazione=valutazione, autore=docente)
 
