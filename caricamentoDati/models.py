@@ -8,6 +8,7 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
+from django.utils.text import slugify
 
 
 class CustomUser(AbstractUser):
@@ -113,6 +114,7 @@ class PubblicazionePresentata(models.Model):
         9999)], default=datetime.date.today().year, verbose_name="anno di pubblicazione")
     doi = models.CharField(max_length=60, null=True, blank=True)
     titolo = models.CharField(max_length=500)
+    slug = models.SlugField(max_length=500, null=True, blank=True)
     tipologia_collezione = models.CharField(
         max_length=500, verbose_name="tipologia della collezione")
     titolo_rivista_atti = models.CharField(
@@ -122,6 +124,11 @@ class PubblicazionePresentata(models.Model):
         MinValueValidator(0)], verbose_name="miglior quartile")
     num_coautori_dip = models.PositiveIntegerField(
         default=1, validators=[MinValueValidator(1)], verbose_name="numero di coautori del dipartimento")
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.titolo)
+        super().save(*args, **kwargs)
 
     class Meta:
         constraints = [models.UniqueConstraint(

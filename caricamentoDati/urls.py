@@ -37,7 +37,7 @@ urlpatterns = [
             name='cancella_pubblicazioni_tot'),
 
     # Cancella una singola pubblicazione
-    re_path('^cancella_pubblicazione_singola/(?P<valutazione_nome>.*)/(?P<pubblicazione_titolo>.*)/$',
+    re_path('^cancella_pubblicazione_singola/(?P<valutazione_nome>.*)/(?P<pubblicazione_slug>.*)/$',
             views.cancella_pubblicazione_singola, name='cancella_pubblicazione_singola'),
 
 

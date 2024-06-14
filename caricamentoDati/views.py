@@ -183,9 +183,9 @@ def cancella_pubblicazioni_tot(request, valutazione_nome):
     return redirect('modifica_valutazione', valutazione)
 
 
-def cancella_pubblicazione_singola(request, pubblicazione_titolo, valutazione_nome):
+def cancella_pubblicazione_singola(request, valutazione_nome, pubblicazione_slug):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
-    PubblicazionePresentata.objects.get(titolo=pubblicazione_titolo).delete()
+    PubblicazionePresentata.objects.get(valutazione=valutazione, slug=pubblicazione_slug).delete()
     return redirect('modifica_valutazione', valutazione)
 # ===================== MODIFICA ====================
 

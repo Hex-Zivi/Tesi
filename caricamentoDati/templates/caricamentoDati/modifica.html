@@ -98,7 +98,7 @@
               <td>{{ pubblicazione.num_coautori_dip }}</td>
               <td>
                 <div type="button">
-                  <form method="post" action="{% url 'cancella_pubblicazione_singola' valutazione_nome=valutazione.nome pubblicazione_titolo=pubblicazione.titolo %}">
+                  <form method="post" action="{% url 'cancella_pubblicazione_singola' valutazione_nome=valutazione.nome pubblicazione_slug=pubblicazione.slug %}">
                     {% csrf_token %}
                     <button class="btn" type="submit">Cancella</button>
                   </form>
