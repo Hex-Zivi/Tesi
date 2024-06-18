@@ -70,23 +70,32 @@ def chiudi_valutazione(request, valutazione_nome):
     valutazione.save()
 
     return redirect('valutazioni')
-
-
-@login_required
-def modifica_valutazione(request, valutazione_nome):
-    valutazione = Valutazione.objects.get(nome=valutazione_nome)
-    form = FormAggiungiPubblicazione()
-
-    context = {
-        'valutazione': valutazione,
-        'pubblicazioni': PubblicazionePresentata.objects.filter(valutazione=valutazione).order_by('titolo'),
-        'form_aggiungi_pubblicazione': form,
-    }
-    return render(request, 'caricamentoDati/modifica.html', context)
 # ===================== VALUTAZIONI / HOME ====================
 
 
 # ===================== MODIFICA ====================
+@login_required
+def modifica_valutazione(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    form = FormAggiungiPubblicazione()
+    pubblicazioni = PubblicazionePresentata.objects.filter(valutazione=valutazione).order_by('titolo')
+
+    pubblicazioni_con_autori = []
+    for pubblicazione in pubblicazioni:
+        autori = Docente.objects.filter(relazionedocentepubblicazione__pubblicazione=pubblicazione)
+        pubblicazioni_con_autori.append({
+            'pubblicazione': pubblicazione,
+            'autori': autori
+        })
+
+    context = {
+        'valutazione': valutazione,
+        'pubblicazioni_con_autori': pubblicazioni_con_autori,
+        'form_aggiungi_pubblicazione': form,
+    }
+    return render(request, 'caricamentoDati/modifica.html', context)
+
+
 def caricamento_con_file(request, filename, valutazione):
     if request.method == 'POST':
         file = request.FILES.get('filename')
@@ -167,9 +176,10 @@ def caricamento_con_file(request, filename, valutazione):
                         RelazioneDocentePubblicazione(pubblicazione=PubblicazionePresentata.objects.get(handle=handle),
                                                       autore=Docente.objects.get(codiceFiscale=codice_fiscale)).save()
 
-        valutazione.status = "Pubblicazioni caricate"
-        valutazione.dataCaricamentoPubblicazioni = datetime.date.today()
-        valutazione.save()
+        if valutazione.status == "Vuota":
+            valutazione.status = "Pubblicazioni caricate"
+            valutazione.dataCaricamentoPubblicazioni = datetime.date.today()
+            valutazione.save()
 
     return redirect('modifica_valutazione', valutazione)
 
@@ -576,12 +586,12 @@ def docente_pubblicazioni(request, valutazione_nome, docente_codice_fiscale):
     try:
         docente = Docente.objects.get(codiceFiscale=docente_codice_fiscale)
     except Docente.DoesNotExist:
-            print("creazione utente")
-            docente_nome = request.user.last_name.upper(
-            ) + " " + request.user.first_name.upper()
-            docente = Docente(cognome_nome=docente_nome,
-                              codiceFiscale=docente_codice_fiscale)
-            docente.save()
+        print("creazione utente")
+        docente_nome = request.user.last_name.upper(
+        ) + " " + request.user.first_name.upper()
+        docente = Docente(cognome_nome=docente_nome,
+                          codiceFiscale=docente_codice_fiscale)
+        docente.save()
 
     relazioni_docente_pubblicazione = RelazioneDocentePubblicazione.objects.filter(
         pubblicazione__valutazione=valutazione, autore=docente)

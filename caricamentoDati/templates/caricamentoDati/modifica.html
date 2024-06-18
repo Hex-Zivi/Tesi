@@ -3,6 +3,32 @@
   Modifica
 {% endblock %}
 {% block content %}
+  <style>
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      padding: 0.5rem 1rem;
+      margin-left: 0.5rem;
+      border-radius: 0.25rem;
+      background-color: #008000;
+      color: #fff !important;
+      border: none;
+      text-decoration: none;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background-color: #008000;
+      color: #fff !important;
+      border: none;
+      text-decoration: none;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:disabled {
+      background-color: #e9ecef;
+      color: #6c757d !important;
+      border: none;
+      text-decoration: none;
+    }
+  </style>
+
   <div class="main">
     <h1>Modifica {{ valutazione.nome }}, {{ valutazione.anno }}. Pubblicazioni richieste per autore: {{ valutazione.numeroPubblicazioni }}</h1>
     <div style="display: flex;">
@@ -12,7 +38,7 @@
       </div>
 
       <div id="confermaCancellazioneModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalConfermaCancellazioneLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document"  style="max-width: 60%; margin: 30px auto;">
+        <div class="modal-dialog" role="document" style="max-width: 60%; margin: 30px auto;">
           <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
               <h5 class="modal-title" id="modalConfermaCancellazioneLabel">Conferma cancellazione</h5>
@@ -68,13 +94,19 @@
     </div>
 
     <div style="padding-top: 80px;">
-      {% if pubblicazioni %}
+      {% if pubblicazioni_con_autori %}
         <h2>Pubblicazioni</h2>
         <table id="table-pubblicazioni" class="table table-bordered" style=" text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+          <div class="col-md-12">
+            <input type="text" id="search-box" class="form-control" placeholder="Cerca..." />
+          </div>
           <thead>
             <tr>
               <th style="vertical-align: top; text-align: left;" data-orderable="true">
                 <b>Titolo</b>
+              </th>
+              <th style="vertical-align: top; text-align: left;" data-orderable="true">
+                <b>Handle</b>
               </th>
               <th data-orderable="true" style="vertical-align: top; text-align: left;">
                 <b>Anno di pubblicazione</b>
@@ -82,20 +114,48 @@
               <th data-orderable="true" style="vertical-align: top; text-align: left;">
                 <b>Miglior quartile</b>
               </th>
+              <th style="vertical-align: top; text-align: left;" data-orderable="true">
+                <b>ISSN</b>
+              </th>
+              <th style="vertical-align: top; text-align: left;" data-orderable="true">
+                <b>Doi</b>
+              </th>
+              <th style="vertical-align: top; text-align: left;" data-orderable="true">
+                <b>Tipologia collezione</b>
+              </th>
+              <th style="vertical-align: top; text-align: left;" data-orderable="true">
+                <b>Titolo di rivista o atti</b>
+              </th>
+              <th style="vertical-align: top; text-align: left;" data-orderable="true">
+                <b>Indicizzato scopus</b>
+              </th>
               <th data-orderable="true" style="vertical-align: top; text-align: left;">
-                <b>Numero di coautori del dipartimento</b>
+                <b>Numero di coautori</b>
+              </th>
+              <th data-orderable="true" style="vertical-align: top; text-align: left;">
+                <b>Autori</b>
               </th>
               <th style="vertical-align: top; text-align: left;">
                 <b>Azioni</b>
               </th>
             </tr>
           </thead>
-          {% for pubblicazione in pubblicazioni %}
+          {% for item in pubblicazioni_con_autori %}
             <tr>
-              <td>{{ pubblicazione.titolo }}</td>
-              <td>{{ pubblicazione.anno_pubblicazione }}</td>
-              <td>{{ pubblicazione.miglior_quartile }}</td>
-              <td>{{ pubblicazione.num_coautori_dip }}</td>
+              <td>{{ item.pubblicazione.titolo }}</td>
+              <td>{{ item.pubblicazione.handle }}</td>
+              <td>{{ item.pubblicazione.anno_pubblicazione }}</td>
+              <td>{{ item.pubblicazione.miglior_quartile }}</td>
+              <td>{{ item.pubblicazione.issn_isbn }}</td>
+              <td>{{ item.pubblicazione.doi }}</td>
+              <td>{{ item.pubblicazione.tipologia_collezione }}</td>
+              <td>{{ item.pubblicazione.titolo_rivista_atti }}</td>
+              <td>{{ item.pubblicazione.indicizzato_scopus }}</td>
+              <td>{{ item.pubblicazione.num_coautori_dip }}</td>
+              <td>{% for autore in item.autori %}
+                                {{ autore.cognome_nome }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
               <td>
                 <div type="button">
                   <form method="post" action="{% url 'cancella_pubblicazione_singola' valutazione_nome=valutazione.nome pubblicazione_slug=pubblicazione.slug %}">

@@ -123,11 +123,25 @@
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <!-- Script personalizzato -->
     <script>
-      $(document).ready(function () {
-        $('#table-pubblicazioni').DataTable()
+      $(document).ready(function() {
+        var table = $('#table-pubblicazioni').DataTable({
+            "pagingType": "simple_numbers",
+            "language": {
+                "paginate": {
+                    "previous": "‹",
+                    "next": "›"
+                }
+            }
+        });
+
+        // Custom search box
+        $('#search-box').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
         $('#modal').on('show.bs.modal', function (event) {
-          var button = $(event.relatedTarget) // Button that triggered the modal
-          var url = button.data('url') // Extract info from data-* attributes
+          var button = $(event.relatedTarget)
+          var url = button.data('url')
           var modal = $(this)
           $.ajax({
             url: url,
