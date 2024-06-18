@@ -21,21 +21,10 @@ def login_view(request):
         # Get info from POST request
         username = request.POST['username']
         pswrd = request.POST['password']
-
-        print(username)
-        print(pswrd)
         
         ldap_backend = LDAPBackend()
         user = ldap_backend.authenticate(request, username=username, password=pswrd)
         request.user
-        print(user)
-
-
-
-        # Da controllare
-        #user_attrs = user.ldap_user._user_attrs._data['objectclass']
-        #user.ruolo = 'admin' if 'univrUtente' in user_attrs else 'user'
-        # // Da controllare
 
         if user is not None:
             user.backend = 'django_auth_ldap.backend.LDAPBackend'
@@ -45,12 +34,15 @@ def login_view(request):
             print("Credenziali corrette")
             return redirect('valutazioni')
         else:
+            context = {
+                'errore': 'Credenziali non corrette, riprovare',
+            }
             print("The username and password were incorrect.")
-            return render(request, 'dashboard/error.html', {})
+            return render(request, 'login.html', context)
     elif request.method == 'GET':
         return render(request, 'login.html', {})
 
 
 def logout_view(request):
-    logout(request)  # Esegui il logout dell'utente
-    return redirect('valutazioni')  # Reindirizza alla pagina di login
+    logout(request)
+    return redirect('valutazioni')
