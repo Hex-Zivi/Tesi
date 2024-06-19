@@ -70,6 +70,49 @@ def chiudi_valutazione(request, valutazione_nome):
     valutazione.save()
 
     return redirect('valutazioni')
+
+
+@login_required
+def esporta_csv(request, valutazione_nome):
+    valutazione = Valutazione.objects.get(nome=valutazione_nome)
+    relazioni = RelazioneDocentePubblicazione.objects.filter(
+        pubblicazione__valutazione=valutazione,
+        scelta=1
+    ).order_by('autore__cognome_nome')
+
+    # Intestazione dei campi per il file di esportazione
+    intestazione = [
+        'Anno di pubblicazione', 'Autore', 'Handle', 'DOI', 'Titolo',
+        'Tipologia collezione', 'ISSN/ISBN', 'Titolo rivista o atti', 'Indicizzato scopus',
+        'Miglior quartile', 'Numero coautori interni al dipartimento'
+    ]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{valutazione_nome}_selezioni.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([f'Selezioni per fondo FUR di {valutazione.nome}, {valutazione.anno}'])
+    writer.writerow('')
+    writer.writerow(intestazione)
+
+    for relazione in relazioni:
+        pub = relazione.pubblicazione
+        row = [
+            pub.anno_pubblicazione,
+            relazione.autore.cognome_nome,
+            pub.handle,
+            pub.doi,
+            pub.titolo,
+            pub.tipologia_collezione,
+            pub.issn_isbn,
+            pub.titolo_rivista_atti,
+            'vero' if pub.indicizzato_scopus else 'falso',
+            pub.miglior_quartile,
+            pub.num_coautori_dip
+        ]
+        writer.writerow(row)
+
+    return response
 # ===================== VALUTAZIONI / HOME ====================
 
 
@@ -78,11 +121,13 @@ def chiudi_valutazione(request, valutazione_nome):
 def modifica_valutazione(request, valutazione_nome):
     valutazione = Valutazione.objects.get(nome=valutazione_nome)
     form = FormAggiungiPubblicazione()
-    pubblicazioni = PubblicazionePresentata.objects.filter(valutazione=valutazione).order_by('titolo')
+    pubblicazioni = PubblicazionePresentata.objects.filter(
+        valutazione=valutazione).order_by('titolo')
 
     pubblicazioni_con_autori = []
     for pubblicazione in pubblicazioni:
-        autori = Docente.objects.filter(relazionedocentepubblicazione__pubblicazione=pubblicazione)
+        autori = Docente.objects.filter(
+            relazionedocentepubblicazione__pubblicazione=pubblicazione)
         pubblicazioni_con_autori.append({
             'pubblicazione': pubblicazione,
             'autori': autori
@@ -107,7 +152,7 @@ def caricamento_con_file(request, filename, valutazione):
                         'num_coautori_interni_dip', 'codice_fiscale']
         riferimento = []
         if file:
-            # Determina il tipo di file e leggi i dati appropriati
+            # Determina il tipo di file
             if file.name.endswith('.csv'):
                 csv_data = csv.reader(file.read().decode(
                     'utf-8').splitlines(), delimiter=',')
@@ -316,8 +361,6 @@ def carica_riviste(request, valutazione_nome):
         xlsx_file = request.FILES.get('filename')
         valutazione = Valutazione.objects.get(nome=valutazione_nome)
         elenco = []
-        intestazione = ['titolo', 'link']
-        riferimento = []
         if xlsx_file:
             workbook = openpyxl.load_workbook(xlsx_file)
             sheet = workbook.active

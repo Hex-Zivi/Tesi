@@ -20,6 +20,10 @@ urlpatterns = [
     re_path('^chiudi valutazione/(?P<valutazione_nome>.*)/$', views.chiudi_valutazione,
             name='chiudi_valutazione'),
 
+    # Esporta il file contenente le pubblicazioni selezionate per la valutazione
+    re_path('^esporta/(?P<valutazione_nome>.*)/$',
+            views.esporta_csv, name='esporta_csv'),
+
 
 
     # MODIFICA

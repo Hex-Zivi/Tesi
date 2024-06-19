@@ -38,11 +38,13 @@
         </div>
       </div>
       
-
       <div style="padding: 20px;">
         <h2>Aggiungi pubblicazione</h2>
         <button type="button" class="btn" data-toggle="modal" data-target="#aggiungiPubblicazioneModal" onclick="loadModalContent()">Aggiungi pubblicazione</button>
       </div>
+  </div>
+
+  <div style="display: flex; padding-top: 30px;">
       <div style="padding: 20px;">
         <h2>Visualizza le pubblicazioni selezionate</h2>
       <form action="{% url 'selezioni' valutazione.nome %}" method="post" style="display: inline;">
@@ -50,7 +52,16 @@
         <button type="submit" class="btn">Visualizza Selezioni</button>
       </form>
     </div>
-    </div>
+    
+    {% if valutazione.status == "Chiusa"%}
+      <div style="padding: 20px;">
+        <h2>Esporta le pubblicazioni selezionate</h2>
+        <form action="{% url 'esporta_csv' valutazione.nome %}" method="get" style="display: inline;">
+        <button type="submit" class="btn">Esporta CSV</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
 
 
     <div style="display: flex; padding-top: 40px;">
