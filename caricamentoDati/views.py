@@ -91,7 +91,8 @@ def esporta_csv(request, valutazione_nome):
     response['Content-Disposition'] = f'attachment; filename="{valutazione_nome}_selezioni.csv"'
 
     writer = csv.writer(response)
-    writer.writerow([f'Selezioni per fondo FUR di {valutazione.nome}, {valutazione.anno}'])
+    writer.writerow(
+        [f'Selezioni per fondo FUR di {valutazione.nome}, {valutazione.anno}'])
     writer.writerow('')
     writer.writerow(intestazione)
 
@@ -487,6 +488,14 @@ def assegnamento_algoritmo(request, valutazione_nome):
         numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
             pubblicazione, relazioni_docente_pubblicazione, docenti)
 
+    for docente in docenti:
+        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+            progresso = 1
+            pubblicazioni = pubblicazioni.exclude(
+                relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+
     progresso = 1  # flag di verifica di aggiunta selezione
 
     for rivista in riviste_ecc:
@@ -523,6 +532,17 @@ def assegnamento_algoritmo(request, valutazione_nome):
                         pubblicazioni = pubblicazioni.exclude(
                             relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
 
+    for docente in docenti:
+        if len(relazioni_docente_pubblicazione.filter(autore=docente)) <= numero_selezioni_valutazione:
+            for relazione in relazioni_docente_pubblicazione.filter(autore=docente):
+                relazione.scelta = 1
+                relazione.save()
+
+                docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                    docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                pubblicazioni = pubblicazioni.exclude(
+                    relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+
     while progresso == 1:
         journal_1_singoloAutore = pubblicazioni.filter(
             miglior_quartile__in=[0, 1], num_coautori_dip=1)
@@ -533,11 +553,73 @@ def assegnamento_algoritmo(request, valutazione_nome):
 
         progresso = 0
 
+        # journal 1
         # Selezione di pubblicazioni con autore singolo
         for docente in docenti.order_by('cognome_nome'):
-            for journal in [journal_1_singoloAutore, journal_2_singoloAutore, journal_3_singoloAutore]:
+            for journal in journal_1_singoloAutore.filter(relazionedocentepubblicazione__autore=docente):
                 if docente in docenti:
-                    for pubblicazione in journal.filter(relazionedocentepubblicazione__autore=docente):
+
+                    if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
+                        docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                            docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                        pubblicazioni = pubblicazioni.exclude(
+                            relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+                        break
+
+                    if relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=journal).scelta == 0:
+                        relazione = RelazioneDocentePubblicazione.objects.get(
+                            pubblicazione=journal, autore=docente)
+                        relazione.scelta = 1
+                        relazione.save()
+
+                        progresso = 1
+
+                        numero_selezioni_docente[docente.pk] += 1
+                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                            progresso = 1
+                            pubblicazioni = pubblicazioni.exclude(
+                                relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
+                            break
+
+        # Selezione di pubblicazioni con autori multipli
+        if progresso == 0:
+            for pubblicazione in pubblicazioni:
+                numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
+                    pubblicazione, relazioni_docente_pubblicazione, docenti)
+
+            journal_1 = pubblicazioni.filter(
+                miglior_quartile__in=[0, 1]).exclude(num_coautori_dip=1)
+
+            for docente in docenti:
+                for pubblicazione in journal_1.filter(relazionedocentepubblicazione__autore=docente):
+
+                    if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
+                        docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                            docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                        break
+
+                    if numero_coautori_possibili_pubblicazione[pubblicazione.pk] <= 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente) and relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=pubblicazione).scelta == 0:
+                        relazione = RelazioneDocentePubblicazione.objects.get(
+                            pubblicazione=pubblicazione, autore=docente)
+                        relazione.scelta = 1
+                        relazione.save()
+
+                        progresso = 1
+
+                        numero_selezioni_docente[docente.pk] += 1
+                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                            progresso = 1
+                            break
+
+        # journal 2
+        if progresso == 0:
+            for docente in docenti.order_by('cognome_nome'):
+                for journal in journal_2_singoloAutore.filter(relazionedocentepubblicazione__autore=docente):
+                    if docente in docenti:
 
                         if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
                             docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
@@ -546,9 +628,9 @@ def assegnamento_algoritmo(request, valutazione_nome):
                                 relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
                             break
 
-                        if pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente) and relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=pubblicazione).scelta == 0:
+                        if relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=journal).scelta == 0:
                             relazione = RelazioneDocentePubblicazione.objects.get(
-                                pubblicazione=pubblicazione, autore=docente)
+                                pubblicazione=journal, autore=docente)
                             relazione.scelta = 1
                             relazione.save()
 
@@ -563,32 +645,53 @@ def assegnamento_algoritmo(request, valutazione_nome):
                                     relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
                                 break
 
-        # Selezione di pubblicazioni con autori multipli
         if progresso == 0:
             for pubblicazione in pubblicazioni:
                 numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
                     pubblicazione, relazioni_docente_pubblicazione, docenti)
 
-            journal_1 = pubblicazioni.filter(
-                miglior_quartile__in=[0, 1]).exclude(num_coautori_dip=1)
             journal_2 = pubblicazioni.filter(
                 miglior_quartile=2).exclude(num_coautori_dip=1)
-            journal_3 = pubblicazioni.exclude(
-                miglior_quartile__in=[0, 1, 2], num_coautori_dip=1)
 
-            for journal in [journal_1, journal_2, journal_3]:
-                for docente in docenti:
+            for docente in docenti:
+                for pubblicazione in journal_2.filter(relazionedocentepubblicazione__autore=docente):
 
-                    for pubblicazione in journal.filter(relazionedocentepubblicazione__autore=docente):
+                    if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
+                        docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                            docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                        break
+
+                    if numero_coautori_possibili_pubblicazione[pubblicazione.pk] <= 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente) and relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=pubblicazione).scelta == 0:
+                        relazione = RelazioneDocentePubblicazione.objects.get(
+                            pubblicazione=pubblicazione, autore=docente)
+                        relazione.scelta = 1
+                        relazione.save()
+
+                        progresso = 1
+
+                        numero_selezioni_docente[docente.pk] += 1
+                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                            progresso = 1
+                            break
+
+        # journal 3
+        if progresso == 0:
+            for docente in docenti.order_by('cognome_nome'):
+                for journal in journal_3_singoloAutore.filter(relazionedocentepubblicazione__autore=docente):
+                    if docente in docenti:
 
                         if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
                             docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
                                 docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                            pubblicazioni = pubblicazioni.exclude(
+                                relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
                             break
 
-                        if numero_coautori_possibili_pubblicazione[pubblicazione.pk] <= 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente) and relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=pubblicazione).scelta == 0:
+                        if relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=journal).scelta == 0:
                             relazione = RelazioneDocentePubblicazione.objects.get(
-                                pubblicazione=pubblicazione, autore=docente)
+                                pubblicazione=journal, autore=docente)
                             relazione.scelta = 1
                             relazione.save()
 
@@ -599,7 +702,40 @@ def assegnamento_algoritmo(request, valutazione_nome):
                                 docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
                                     docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
                                 progresso = 1
+                                pubblicazioni = pubblicazioni.exclude(
+                                    relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
                                 break
+
+        if progresso == 0:
+            for pubblicazione in pubblicazioni:
+                numero_coautori_possibili_pubblicazione[pubblicazione.pk] = calcola_numero_coautori_possibili(
+                    pubblicazione, relazioni_docente_pubblicazione, docenti)
+
+            journal_3 = pubblicazioni.exclude(
+                miglior_quartile__in=[0, 1, 2], num_coautori_dip=1)
+
+            for docente in docenti:
+                for pubblicazione in journal_3.filter(relazionedocentepubblicazione__autore=docente):
+
+                    if numero_selezioni_docente.get(docente.pk, 0) >= numero_selezioni_valutazione:
+                        docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                            docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                        break
+
+                    if numero_coautori_possibili_pubblicazione[pubblicazione.pk] <= 1 and pubblicazione in pubblicazioni.filter(relazionedocentepubblicazione__autore=docente) and relazioni_docente_pubblicazione.get(autore=docente, pubblicazione=pubblicazione).scelta == 0:
+                        relazione = RelazioneDocentePubblicazione.objects.get(
+                            pubblicazione=pubblicazione, autore=docente)
+                        relazione.scelta = 1
+                        relazione.save()
+
+                        progresso = 1
+
+                        numero_selezioni_docente[docente.pk] += 1
+                        if numero_selezioni_docente.get(docente.pk, 0) == numero_selezioni_valutazione:
+                            docenti, numero_coautori_possibili_pubblicazione, relazioni_docente_pubblicazione = rimuovi_docente(
+                                docente, pubblicazioni, relazioni_docente_pubblicazione, docenti, numero_coautori_possibili_pubblicazione)
+                            progresso = 1
+                            break
 
     valutazione.status = "Assegnamento calcolato"
     valutazione.save()

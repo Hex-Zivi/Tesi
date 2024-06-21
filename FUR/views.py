@@ -29,8 +29,6 @@ def login_view(request):
         if user is not None:
             user.backend = 'django_auth_ldap.backend.LDAPBackend'
             login(request, user)
-            print(user.codice_fiscale, user.ruolo,
-                  user.first_name, user.last_name, user.uid)
             print("Credenziali corrette")
             return redirect('valutazioni')
         else:

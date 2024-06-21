@@ -14,7 +14,8 @@ import os
 from pathlib import Path
 
 import ldap
-from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+from django_auth_ldap.config import LDAPSearch
+#GroupOfNamesType
 
 
 
