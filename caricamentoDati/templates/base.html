@@ -33,8 +33,9 @@
   </head>
   <body>
     <div class="wrapper">
-      <div class="header">
+      <div class="header" style="height: auto;">
         <div class="id">
+          <h4>{{ user.first_name }} {{user.last_name}}{%if user.is_staff%}, amministrazione{%endif%}</h4>
           {% if is_superuser %}
             <form action="/admin/" method="get">
               <button type="submit" class="btn" style="background-color: #00cc44;">Controllo Avanzato</button>
@@ -138,6 +139,18 @@
         $('#search-box').on('keyup', function() {
             table.search(this.value).draw();
         });
+
+        var tabella_valutazioni = $('#tabella_valutazioni').DataTable({
+          "pagingType": "simple_numbers",
+          "language": {
+              "paginate": {
+                  "previous": "‹",
+                  "next": "›"
+              }
+          }
+      });
+
+
 
         $('#modal').on('show.bs.modal', function (event) {
           var button = $(event.relatedTarget)

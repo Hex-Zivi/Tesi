@@ -393,7 +393,7 @@ def carica_riviste(request, valutazione_nome):
                             link=link,
                             issn1=issn1,
                             issn2=issn2
-                        )
+                        ) 
 
     return redirect('modifica_valutazione', valutazione)
 
