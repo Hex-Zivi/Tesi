@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}
   Assegnamento delle Pubblicazioni
 {% endblock %}
@@ -103,8 +104,9 @@
     <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-body">
-            <p>Operazione in corso, potrebbe richiedere qualche minuto...</p>
+          <div class="modal-body" style="display: flex; align-items: center;">
+            <img src="{% static 'loading.gif' %}" alt="Caricamento" style="width: 50px; height: 50px; display: inline;">
+            <p style="display: inline; margin-left: 30px;">Operazione in corso, potrebbe richiedere qualche minuto...</p>
           </div>
         </div>
       </div>

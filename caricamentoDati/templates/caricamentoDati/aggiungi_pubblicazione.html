@@ -16,49 +16,57 @@
         {% csrf_token %}
         <div style="display: flex;">
           <div style="flex: 2;">
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.handle.label_tag }}
+            <div class="form-group col-md-4">
+              <label for="handle" class="col-form-label">Handle:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.handle }}
+              <input type="text" class="form-control" name="handle" id="handle" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.titolo.label_tag }}
+          </br>
+            <div class="form-group col-md-4">
+              <label for="titolo" class="col-form-label">Titolo:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.titolo }}
+              <input type="text" class="form-control" name="titolo" id="titolo" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.anno_pubblicazione.label_tag }}
+          </br>
+            <div class="form-group col-md-4">
+              <label for="anno_pubblicazione" class="col-form-label">Anno di pubblicazione:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.anno_pubblicazione }}
+              <input type="text" class="form-control" name="anno_pubblicazione" id="anno_pubblicazione" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.miglior_quartile.label_tag }}
+          </br>
+            <div class="form-group col-md-4">
+              <label for="miglior_quartile" class="col-form-label">Miglior quartile:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.miglior_quartile }}
+              <input type="text" class="form-control" name="miglior_quartile" id="miglior_quartile" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.issn_isbn.label_tag }}
+          </br>
+            <div class="form-group col-md-4">
+              <label for="issn_isbn" class="col-form-label">ISSN/ISBN:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.issn_isbn }}
+              <input type="text" class="form-control" name="issn_isbn" id="issn_isbn" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.doi.label_tag }}
+          </br>
+            <div class="form-group col-md-4">
+              <label for="doi" class="col-form-label">Doi:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.doi }}
+              <input type="text" class="form-control" name="doi" id="doi" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.tipologia_collezione.label_tag }}
+          </br>
+            <div class="form-group col-md-4">
+              <label for="tipologia_collezione" class="col-form-label">Tipologia collezione:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.tipologia_collezione }}
+              <input type="text" class="form-control" name="tipologia_collezione" id="tipologia_collezione" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.titolo_rivista_atti.label_tag }}
+          </br>
+            <div class="form-group col-md-4">
+              <label for="titolo_rivista_atti" class="col-form-label">Titolo rivista o atti:</label>
             </br>
-              {{ form_aggiungi_pubblicazione.titolo_rivista_atti }}
+              <input type="text" class="form-control" name="titolo_rivista_atti" id="titolo_rivista_atti" required />
             </div>
-            <div class="form-group" style="padding-bottom: 20px;">
-              {{ form_aggiungi_pubblicazione.indicizzato_scopus.label_tag }}
-            </br>
+          </br>
+            <div class="form-group col-md-4">
+              <label for="handle" class="col-form-label">Indicizzato scopus:</label>
+
               {{ form_aggiungi_pubblicazione.indicizzato_scopus }}
             </div>
           </div>
@@ -66,17 +74,13 @@
           <div style="flex: 2;">
             <div class="form-group">
               {{ form_aggiungi_pubblicazione.autori.label_tag }}
-              <div style="max-height: 600px; overflow-y: auto;">
-                {{ form_aggiungi_pubblicazione.autori }}
-              </div>
+              <div style="max-height: 600px; overflow-y: auto;">{{ form_aggiungi_pubblicazione.autori }}</div>
             </div>
           </div>
 
           <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end;">
-            <button class="btn btn-primary" type="submit" style="padding: 10px 20px; font-size: 24px; border: none; border-radius: 4px; margin-top: auto; margin-bottom: auto;">
-              Aggiungi
-            </button>
-          </div>        
+            <button class="btn btn-primary" type="submit" style="padding: 10px 20px; font-size: 24px; border: none; border-radius: 4px; margin-top: auto; margin-bottom: auto;">Aggiungi</button>
+          </div>
         </div>
       </form>
     </div>
@@ -85,10 +89,10 @@
   <!-- Script per gestire l'invio del form tramite AJAX -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var form = document.querySelector('#aggiungi_pubblicazione_form');
+      var form = document.querySelector('#aggiungi_pubblicazione_form')
       form.addEventListener('submit', function (event) {
-        event.preventDefault(); // Previeni il comportamento predefinito della form
-
+        event.preventDefault() // Previeni il comportamento predefinito della form
+    
         // Effettua una richiesta AJAX per aggiungere la pubblicazione
         fetch(form.action, {
           method: 'POST',
@@ -101,18 +105,17 @@
           .then((data) => {
             if (data.success) {
               // Se l'aggiunta della pubblicazione è avvenuta con successo, chiudi la finestra modale corrente
-              $('#aggiungiPubblicazioneModal').modal('hide');
-              location.reload(); // Opzionale: Ricarica la pagina o aggiorna la tabella con i nuovi dati
+              $('#aggiungiPubblicazioneModal').modal('hide')
+              location.reload() // Opzionale: Ricarica la pagina o aggiorna la tabella con i nuovi dati
             } else {
               // Gestisci eventuali errori o altre situazioni qui
-              console.error("Errore durante l'aggiunta della pubblicazione");
+              console.error("Errore durante l'aggiunta della pubblicazione")
             }
           })
           .catch((error) => {
-            console.error('Si è verificato un errore:', error);
-          });
-      });
-    });
+            console.error('Si è verificato un errore:', error)
+          })
+      })
+    })
   </script>
 {% endblock %}
-

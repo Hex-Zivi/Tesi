@@ -18,7 +18,7 @@ Vista pubblicazioni del docente
   <div style="display: flex; padding-top: 40px;">
     <form id="selezioneForm" method="post" style="display: inline;" action="{% url 'salva_selezioni' valutazione.nome docente_codice_fiscale %}">
       {% csrf_token %}
-      <table id="table-docente-pubblicazione" class="table table-bordered" style=" text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+      <table id="table-docente-pubblicazione" class="table table-bordered" style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
         <thead>
         <tr>
           <th style="vertical-align: top; text-align: left;"><b>Titolo</b></th>

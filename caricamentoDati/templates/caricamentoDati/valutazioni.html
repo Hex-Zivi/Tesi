@@ -60,46 +60,8 @@
                   </form>
 
                   <button type="button" class="btn" data-toggle="modal" data-target="#confirmDeleteModal" data-valutazione="{{ valutazione.nome }}" style="display: inline; margin-bottom: 10px;">Cancella</button>
-                  <!-- Modale di conferma cancellazione -->
-                  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="confirmDeleteModalLabel">Conferma Cancellazione</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <div class="modal-body">Sei sicuro di voler cancellare la valutazione {{ valutazione.nome }}?</div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
-                          <form id="deleteForm" action="{% url 'cancella_valutazione' valutazione.nome %}" method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Conferma</button>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
                   <button type="button" class="btn" data-toggle="modal" data-target="#confirmCloseModal" data-valutazione="{{ valutazione.nome }}" style="display: inline; margin-bottom: 10px;">Chiudi</button>
-                  <!-- Modale di conferma chiusura -->
-                  <div class="modal fade" id="confirmCloseModal" tabindex="-1" role="dialog" aria-labelledby="confirmCloseModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="confirmCloseModalLabel">Conferma Chiusura</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <div class="modal-body">Vuoi confermare la selezione delle pubblicazioni?</div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
-                          <form id="closeForm" action="{% url 'chiudi_valutazione' valutazione.nome %}" method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Conferma</button>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
                   <form action="{% url 'selezioni' valutazione.nome %}" method="post" style="display: inline;">
                     {% csrf_token %}
@@ -148,6 +110,46 @@
         </form>
       </div>
 
+      <!-- Modale di conferma cancellazione -->
+      <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmDeleteModalLabel">Conferma Cancellazione</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">Sei sicuro di voler cancellare la valutazione <span id="deleteValutazioneNome"></span>?</div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
+              <form id="deleteForm" action="" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Conferma</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modale di conferma chiusura -->
+      <div class="modal fade" id="confirmCloseModal" tabindex="-1" role="dialog" aria-labelledby="confirmCloseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmCloseModalLabel">Conferma Chiusura</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">Vuoi confermare la selezione delle pubblicazioni per <span id="closeValutazioneNome"></span>?</div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
+              <form id="closeForm" action="" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Conferma</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <style>
         .form-group {
           display: flex;
@@ -172,7 +174,8 @@
       var valutazioneNome = button.data('valutazione') // Estrapola il valore dell'attributo data-valutazione
       var modal = $(this)
       var form = modal.find('#deleteForm') // Trova il form all'interno del modale
-      form.attr('action', '/url/per/cancellare/valutazione/' + valutazioneNome + '/') // Imposta l'azione del form con il nome della valutazione
+      form.attr('action', '{% url "cancella_valutazione" "" %}' + valutazioneNome + '/') // Imposta l'azione del form con il nome della valutazione
+      modal.find('#deleteValutazioneNome').text(valutazioneNome) // Imposta il nome della valutazione nel testo del modale
     })
     
     // Funzione per impostare l'azione del form di chiusura
@@ -181,7 +184,8 @@
       var valutazioneNome = button.data('valutazione') // Estrapola il valore dell'attributo data-valutazione
       var modal = $(this)
       var form = modal.find('#closeForm') // Trova il form all'interno del modale
-      form.attr('action', '/url/per/chiusura/valutazione/' + valutazioneNome + '/') // Imposta l'azione del form con il nome della valutazione
+      form.attr('action', '{% url "chiudi_valutazione" "" %}' + valutazioneNome + '/') // Imposta l'azione del form con il nome della valutazione
+      modal.find('#closeValutazioneNome').text(valutazioneNome) // Imposta il nome della valutazione nel testo del modale
     })
   </script>
 {% endblock %}

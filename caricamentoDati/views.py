@@ -362,40 +362,48 @@ def carica_riviste(request, valutazione_nome):
         xlsx_file = request.FILES.get('filename')
         valutazione = Valutazione.objects.get(nome=valutazione_nome)
         elenco = []
-        if xlsx_file:
+
+        # Verifica del formato del file
+        if not xlsx_file.name.endswith('.xlsx'):
+            return HttpResponse("Formato file errato. Caricare un file .xlsx", status=400)
+
+        try:
             workbook = openpyxl.load_workbook(xlsx_file)
-            sheet = workbook.active
-            for row in sheet.iter_rows(values_only=True):
-                elenco.append(row)
+        except Exception as e:
+            return HttpResponse(f"Errore nel caricamento del file: {e}", status=400)
 
-            with transaction.atomic():
-                for riga in elenco[1:]:
-                    nome = riga[0].upper()
-                    link = riga[1]
+        sheet = workbook.active
+        for row in sheet.iter_rows(values_only=True):
+            elenco.append(row)
 
-                    response = requests.get(link)
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    issn_header = soup.find('h2', string="ISSN")
-                    issn_element = issn_header.find_next(
-                        'p') if issn_header else None
-                    issn_text = issn_element.text.strip() if issn_element else "ISSN non trovato"
+        with transaction.atomic():
+            for riga in elenco[1:]:
+                nome = riga[0].upper()
+                link = riga[1]
 
-                    # Se ci sono più di un ISSN, dividi e formatta entrambi
-                    issn_list = [format_ISSN(issn.strip())
-                                 for issn in issn_text.split(',')]
-                    issn1 = issn_list[0] if issn_list else ''
-                    issn2 = issn_list[1] if len(issn_list) > 1 else ''
+                response = requests.get(link)
+                soup = BeautifulSoup(response.content, 'html.parser')
+                issn_header = soup.find('h2', string="ISSN")
+                issn_element = issn_header.find_next(
+                    'p') if issn_header else None
+                issn_text = issn_element.text.strip() if issn_element else "ISSN non trovato"
 
-                    if not RivistaEccellente.objects.filter(valutazione=valutazione, nome=nome).exists():
-                        RivistaEccellente.objects.create(
-                            valutazione=valutazione,
-                            nome=nome,
-                            link=link,
-                            issn1=issn1,
-                            issn2=issn2
-                        ) 
+                # Se ci sono più di un ISSN, dividi e formatta entrambi
+                issn_list = [format_ISSN(issn.strip())
+                             for issn in issn_text.split(',')]
+                issn1 = issn_list[0] if issn_list else ''
+                issn2 = issn_list[1] if len(issn_list) > 1 else ''
 
-    return redirect('modifica_valutazione', valutazione)
+                if not RivistaEccellente.objects.filter(valutazione=valutazione, nome=nome).exists():
+                    RivistaEccellente.objects.create(
+                        valutazione=valutazione,
+                        nome=nome,
+                        link=link,
+                        issn1=issn1,
+                        issn2=issn2
+                    )
+
+    return redirect('modifica_valutazione', valutazione_nome)
 
 
 def cancella_riviste(request, valutazione_nome):
