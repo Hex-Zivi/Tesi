@@ -129,9 +129,12 @@ def modifica_valutazione(request, valutazione_nome):
     for pubblicazione in pubblicazioni:
         autori = Docente.objects.filter(
             relazionedocentepubblicazione__pubblicazione=pubblicazione)
+        selezioni = RelazioneDocentePubblicazione.objects.filter(pubblicazione=pubblicazione)
+        selezioni = selezioni.exclude(scelta=0)
         pubblicazioni_con_autori.append({
             'pubblicazione': pubblicazione,
-            'autori': autori
+            'autori': autori,
+            'selezioni': len(selezioni),
         })
 
     context = {

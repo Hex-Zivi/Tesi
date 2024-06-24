@@ -148,6 +148,9 @@
               <th data-orderable="true" style="vertical-align: top; text-align: left;">
                 <b>Autori</b>
               </th>
+              <th data-orderable="true" style="vertical-align: top; text-align: left;">
+                <b>Numero di selezioni</b>
+              </th>
               <th style="vertical-align: top; text-align: left;">
                 <b>Azioni</b>
               </th>
@@ -171,6 +174,7 @@
                   {{ autore.cognome_nome }}{% if not forloop.last %}, {% endif %}
                 {% endfor %}
               </td>
+              <td>{{ item.selezioni }}</td>
               <td>
                 <div type="button">
                   <form method="post" action="{% url 'cancella_pubblicazione_singola' valutazione_nome=valutazione.nome pubblicazione_slug=item.pubblicazione.slug %}">
