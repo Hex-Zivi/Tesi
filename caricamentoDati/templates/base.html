@@ -166,6 +166,18 @@
           })
         })
       })
+
+      var sessionTimeout = {{ 3660 }};
+        // URL a cui reindirizzare
+        var redirectUrl = '/';
+
+        // Funzione per reindirizzare la pagina
+        function redirectToUrl() {
+            window.location.href = redirectUrl;
+        }
+
+        // Imposta il timeout per reindirizzare la pagina
+        setTimeout(redirectToUrl, sessionTimeout * 1000);
     </script>
   </body>
 </html>

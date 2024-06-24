@@ -65,89 +65,123 @@
   </div>
 
 
-    <div style="display: flex; padding-top: 40px;">
-      <table id="table-docenti" class="table table-bordered" style="text-align: left; width: 100%;margin: 10px;" border="1" cellpadding="2" cellspacing="2">
-        <thead>
-        <tr>
-          <th style="vertical-align: top; text-align: left;">
-            <b>Cognome e Nome</b>
-          </th>
-          <th style="vertical-align: top; text-align: left;">
-            <b>Numero di pubblicazioni richieste</b>
-          </th>
-          <th style="vertical-align: top; text-align: left;">
-            <b>Numero di pubblicazioni assegnate</b>
-          </th>
-          <th style="vertical-align: top; text-align: left;">
-            <b>Numero di pubblicazioni</b>
-          </th>
-          <th style="vertical-align: top; text-align: left;">
-            <b>Quartili selezionati</b>
-          </th>
-        </tr>
-        </thead>
-        {% for docente in informazioni_docente.docenti_info %}
-        <tr>
-          <td>
-            <input type="checkbox" {% if docente.condizione_pubblicazioni %}checked{% endif %} disabled>
-            &nbsp;
-            <a href="{% url 'docente_pubblicazioni' valutazione.nome docente.codice_fiscale %}">{{ docente.cognome_nome }}</a>
-          </td>
-          <td>{{ docente.num_pubblicazioni_richieste }}</td>
-          <td>{{ docente.num_pubblicazioni_assegnate }}</td>
-          <td>{{ docente.pubblicazioni_totali }}</td>
-          <td>{{ docente.quartili|join:', ' }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-body" style="display: flex; align-items: center;">
-            <img src="{% static 'loading.gif' %}" alt="Caricamento" style="width: 50px; height: 50px; display: inline;">
-            <p style="display: inline; margin-left: 30px;">Operazione in corso, potrebbe richiedere qualche minuto...</p>
-          </div>
-        </div>
+  <div style="padding: 20px;">
+    <h2>Filtri</h2>
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label for="filtroNomeAutore">Nome autore:</label>
+        <input type="text" class="form-control" id="filtroNomeAutore" placeholder="Inserisci nome autore">
+      </div>
+      <div class="form-group col-md-4">
+        <label for="filtroCheckbox">Stato checkbox:</label>
+        <select class="form-control" id="filtroCheckbox">
+          <option value="">Tutti</option>
+          <option value="checked">Checked</option>
+          <option value="not_checked">Non checked</option>
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        <button class="btn btn-primary" id="applicaFiltriBtn">Applica filtri</button>
       </div>
     </div>
-    
+  </div>
+
+  <div style="display: flex; padding-top: 30px;">
+    <div id="tableContainer" style="width: 100%;">
+      <table id="table-docenti" class="table table-bordered" style="text-align: left; width: 100%; margin: 10px;" border="1" cellpadding="2" cellspacing="2">
+        <thead>
+          <tr>
+            <th style="vertical-align: top; text-align: left;">
+              <b>Cognome e Nome</b>
+            </th>
+            <th style="vertical-align: top; text-align: left;">
+              <b>Numero di pubblicazioni richieste</b>
+            </th>
+            <th style="vertical-align: top; text-align: left;">
+              <b>Numero di pubblicazioni assegnate</b>
+            </th>
+            <th style="vertical-align: top; text-align: left;">
+              <b>Numero di pubblicazioni</b>
+            </th>
+            <th style="vertical-align: top; text-align: left;">
+              <b>Quartili selezionati</b>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for docente in informazioni_docente.docenti_info %}
+          <tr class="docente-row" data-nome="{{ docente.cognome_nome }}" data-checkbox="{% if docente.condizione_pubblicazioni %}checked{% else %}not_checked{% endif %}">
+            <td>
+              <input type="checkbox" {% if docente.condizione_pubblicazioni %}checked{% endif %} disabled>
+              &nbsp;
+              <a href="{% url 'docente_pubblicazioni' valutazione.nome docente.codice_fiscale %}">{{ docente.cognome_nome }}</a>
+            </td>
+            <td>{{ docente.num_pubblicazioni_richieste }}</td>
+            <td>{{ docente.num_pubblicazioni_assegnate }}</td>
+            <td>{{ docente.pubblicazioni_totali }}</td>
+            <td>{{ docente.quartili|join:', ' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div id="noResultsMessage" class="alert alert-info" style="display: none; width: 100%;">
+        Nessun risultato trovato.
+      </div>
     </div>
+  </div>
+</div>
 
-    <script>
-      
-        function openConfirmModal() {
-          $('#confirmModal').modal('show');
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Seleziona il pulsante di applicazione dei filtri
+    var applicaFiltriBtn = document.getElementById('applicaFiltriBtn');
+
+    // Aggiungi un gestore di eventi al pulsante di applicazione dei filtri
+    applicaFiltriBtn.addEventListener('click', function () {
+      var filtroNomeAutore = document.getElementById('filtroNomeAutore').value.trim().toLowerCase();
+      var filtroCheckbox = document.getElementById('filtroCheckbox').value;
+
+      // Seleziona tutte le righe dei docenti
+      var docenteRows = document.querySelectorAll('.docente-row');
+
+      var nessunRisultato = true;
+
+      docenteRows.forEach(function (row) {
+        var nomeDocente = row.getAttribute('data-nome').toLowerCase();
+        var statoCheckbox = row.getAttribute('data-checkbox');
+
+        var mostraRiga = true;
+
+        // Applica il filtro per nome autore
+        if (filtroNomeAutore !== '' && !nomeDocente.includes(filtroNomeAutore)) {
+          mostraRiga = false;
         }
-      
-        document.getElementById('confirmAzzeraButton').addEventListener('click', function () {
-          document.getElementById('azzeraForm').submit();
-        });
-      
-  
-      function submitCalcolaForm() {
-        // Mostra il modal
-        $('#loadingModal').modal({
-          backdrop: 'static',
-          keyboard: false
-        });
-    
-        // Invia il form
-        document.getElementById('calcolaForm').submit();
-      }
 
-  function loadModalContent() {
-    var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='assegnamento' docente='admin' %}"
-    fetch(url, {
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
+        // Applica il filtro per stato checkbox
+        if (filtroCheckbox === 'checked' && statoCheckbox !== 'checked') {
+          mostraRiga = false;
+        }
+        if (filtroCheckbox === 'not_checked' && statoCheckbox !== 'not_checked') {
+          mostraRiga = false;
+        }
+
+        // Mostra o nascondi la riga in base al filtro
+        if (mostraRiga) {
+          row.style.display = '';
+          nessunRisultato = false; // Se almeno una riga è mostrata, non ci sono "nessun risultato"
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Mostra/nascondi il messaggio di nessun risultato trovato
+      var noResultsMessage = document.getElementById('noResultsMessage');
+      if (nessunRisultato) {
+        noResultsMessage.style.display = 'block';
+      } else {
+        noResultsMessage.style.display = 'none';
       }
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        document.getElementById('modalContent').innerHTML = data.html
-      })
-      .catch((error) => console.error('Errore nel caricamento del contenuto del modale:', error))
-  }
+    });
+  });
 </script>
 {% endblock %}

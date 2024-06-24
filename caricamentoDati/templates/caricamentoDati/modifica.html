@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}
   Modifica
 {% endblock %}
@@ -58,13 +59,25 @@
 
       <div style="padding: 20px;">
         <h2>Carica pubblicazioni</h2>
-        <form method="post" enctype="multipart/form-data" action="{% url 'caricamento_con_file' filename='temp' valutazione=valutazione.nome %}">
+        <form id="uploadForm" method="post" enctype="multipart/form-data" action="{% url 'caricamento_con_file' filename='temp' valutazione=valutazione.nome %}">
           {% csrf_token %}
           <label for="filename">Seleziona un file CSV:</label>
           <input type="file" name="filename" id="filename" />
           <br />
-          <button class="btn" type="submit">Carica</button>
+          <button class="btn" type="submit" id="uploadButton">Carica</button>
         </form>
+      </div>
+
+      <!-- Modale per visualizzare il caricamento -->
+      <div id="caricamentoModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalCaricamentoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body text-center" style="display: flex; align-items: center;">
+              <img src="{% static 'loading.gif' %}" alt="Caricamento in corso..." style="width: 50px; height: 50px; display: inline;" />
+              <p style="display: inline; padding: 20px">Caricamento in corso...</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Pulsante per aprire il modale -->
@@ -147,15 +160,17 @@
               <td>{{ item.pubblicazione.anno_pubblicazione }}</td>
               <td>{{ item.pubblicazione.miglior_quartile }}</td>
               <td>{{ item.pubblicazione.issn_isbn }}</td>
+
               <td>{{ item.pubblicazione.doi }}</td>
               <td>{{ item.pubblicazione.tipologia_collezione }}</td>
               <td>{{ item.pubblicazione.titolo_rivista_atti }}</td>
               <td>{{ item.pubblicazione.indicizzato_scopus }}</td>
               <td>{{ item.pubblicazione.num_coautori_dip }}</td>
-              <td>{% for autore in item.autori %}
-                                {{ autore.cognome_nome }}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </td>
+              <td>
+                {% for autore in item.autori %}
+                  {{ autore.cognome_nome }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              </td>
               <td>
                 <div type="button">
                   <form method="post" action="{% url 'cancella_pubblicazione_singola' valutazione_nome=valutazione.nome pubblicazione_slug=item.pubblicazione.slug %}">
@@ -173,6 +188,7 @@
     </div>
   </div>
 
+  <!-- JavaScript per gestire il caricamento del file e visualizzare il modale di caricamento -->
   <script>
     function loadModalContent() {
       var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}"
@@ -201,5 +217,11 @@
         })
         .catch((error) => console.error('Errore nel caricamento del contenuto del modale:', error))
     }
+    
+    // Aggiungi un event listener al form di caricamento
+    document.getElementById('uploadForm').addEventListener('submit', function () {
+      // Mostra il modale di caricamento quando il form viene inviato
+      showLoadingModal()
+    })
   </script>
 {% endblock %}

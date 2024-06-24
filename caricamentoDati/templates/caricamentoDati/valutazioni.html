@@ -4,87 +4,93 @@
 {% endblock %}
 {% block content %}
   <div style="display: flex;">
-    <div style="flex: 3; padding: 20px;">
-      <h1>Valutazioni</h1>
-      <table class="table table-bordered" border="1" id="tabella_valutazioni">
-        <thead>
-          <tr>
-            <th style="vertical-align: top; text-align: left;">
-              <b>Anno</b><br />
-            </th>
-            <th style="vertical-align: top; text-align: left;">
-              <b>Nome</b><br />
-            </th>
-            <th style="vertical-align: top; text-align: left;">
-              <b>Numero di Pubblicazioni per autore</b><br />
-            </th>
-            <th style="vertical-align: top; text-align: left;">
-              <b>Stato</b><br />
-            </th>
-            <th style="vertical-align: top; text-align: left;">
-              <b>Azioni</b><br />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Riga di una valutazione -->
-          {% for valutazione in valutazioni %}
+    {% if valutazioni %}
+      <div style="flex: 3; padding: 20px;">
+        <h1>Valutazioni</h1>
+        <table class="table table-bordered" border="1" id="tabella_valutazioni">
+          <thead>
             <tr>
-              <td style="vertical-align; text-align: left;">
-                {{ valutazione.anno }}<br />
-              </td>
-              <td style="vertical-align; text-align: left;">
-                {{ valutazione.nome }}<br />
-              </td>
-              <td style="vertical-align; text-align: left;padding-left: 5%">
-                {{ valutazione.numeroPubblicazioni }}<br />
-              </td>
-              <td style="vertical-align; text-align: left;">
-                {% if valutazione.status == 'Pubblicazioni caricate' %}
-                  {{ valutazione.status }} in data {{ valutazione.dataCaricamentoPubblicazioni }}
-                {% else %}
-                  {{ valutazione.status }}
-                {% endif %}
-                <br />
-              </td>
-              <td style="vertical-align: top; text-align: left;">
-                {% if user.is_staff %}
-                  <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline; margin-bottom: 10px;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Modifica</button>
-                  </form>
+              <th style="vertical-align: top; text-align: left;">
+                <b>Anno</b><br />
+              </th>
+              <th style="vertical-align: top; text-align: left;">
+                <b>Nome</b><br />
+              </th>
+              <th style="vertical-align: top; text-align: left;">
+                <b>Numero di Pubblicazioni per autore</b><br />
+              </th>
+              <th style="vertical-align: top; text-align: left;">
+                <b>Stato</b><br />
+              </th>
+              <th style="vertical-align: top; text-align: left;">
+                <b>Azioni</b><br />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Riga di una valutazione -->
+            {% for valutazione in valutazioni %}
+              <tr>
+                <td style="vertical-align; text-align: left;">
+                  {{ valutazione.anno }}<br />
+                </td>
+                <td style="vertical-align; text-align: left;">
+                  {{ valutazione.nome }}<br />
+                </td>
+                <td style="vertical-align; text-align: left;padding-left: 5%">
+                  {{ valutazione.numeroPubblicazioni }}<br />
+                </td>
+                <td style="vertical-align; text-align: left;">
+                  {% if valutazione.status == 'Pubblicazioni caricate' %}
+                    {{ valutazione.status }} in data {{ valutazione.dataCaricamentoPubblicazioni }}
+                  {% else %}
+                    {{ valutazione.status }}
+                  {% endif %}
+                  <br />
+                </td>
+                <td style="vertical-align: top; text-align: left;">
+                  {% if user.is_staff %}
+                    <form action="{% url 'modifica_valutazione' valutazione.nome %}" method="post" style="display: inline; margin-bottom: 10px;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Modifica</button>
+                    </form>
 
-                  <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Assegna Pubblicazioni</button>
-                  </form>
+                    <form action="{% url 'assegnamento' valutazione.nome %}" method="post" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Assegna Pubblicazioni</button>
+                    </form>
 
-                  <button type="button" class="btn" data-toggle="modal" data-target="#confirmDeleteModal" data-valutazione="{{ valutazione.nome }}" style="display: inline; margin-bottom: 10px;">Cancella</button>
+                    <button type="button" class="btn" data-toggle="modal" data-target="#confirmDeleteModal" data-tipo="cancella" data-valutazione="{{ valutazione.nome }}" data-url="{% url 'cancella_valutazione' valutazione.nome %}" style="display: inline; margin-bottom: 10px;">Cancella</button>
 
-                  <button type="button" class="btn" data-toggle="modal" data-target="#confirmCloseModal" data-valutazione="{{ valutazione.nome }}" style="display: inline; margin-bottom: 10px;">Chiudi</button>
+                    <button type="button" class="btn" data-toggle="modal" data-target="#confirmCloseModal" data-tipo="chiudi" data-valutazione="{{ valutazione.nome }}" data-url="{% url 'chiudi_valutazione' valutazione.nome %}" style="display: inline; margin-bottom: 10px;">Chiudi</button>
 
-                  <form action="{% url 'selezioni' valutazione.nome %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Visualizza Selezioni</button>
-                  </form>
+                    <form action="{% url 'selezioni' valutazione.nome %}" method="post" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Visualizza Selezioni</button>
+                    </form>
 
-                  {% if valutazione.status == 'Chiusa' %}
-                    <form action="{% url 'esporta_csv' valutazione.nome %}" method="get" style="display: inline;">
-                      <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Esporta CSV</button>
+                    {% if valutazione.status == 'Chiusa' %}
+                      <form action="{% url 'esporta_csv' valutazione.nome %}" method="get" style="display: inline;">
+                        <button type="submit" class="btn" style="display: inline; margin-bottom: 10px;">Esporta CSV</button>
+                      </form>
+                    {% endif %}
+                  {% else %}
+                    <form action="{% url 'docente_pubblicazioni' valutazione.nome cf %}" method="post" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn">Assegna Pubblicazioni</button>
                     </form>
                   {% endif %}
-                {% else %}
-                  <form action="{% url 'docente_pubblicazioni' valutazione.nome cf %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn">Assegna Pubblicazioni</button>
-                  </form>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="flex: 3; padding: 20px;">
+        <h4>Nessuna valutazione disponibile.</h4>
+      </div>
+    {% endif %}
 
     <!-- Sezione di caricamento nuova valutazione -->
     {% if user.is_staff %}
@@ -118,7 +124,9 @@
               <h5 class="modal-title" id="confirmDeleteModalLabel">Conferma Cancellazione</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
-            <div class="modal-body">Sei sicuro di voler cancellare la valutazione <span id="deleteValutazioneNome"></span>?</div>
+            <div class="modal-body">
+              Sei sicuro di voler cancellare la valutazione <span id="deleteValutazioneNome"></span>?
+            </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
               <form id="deleteForm" action="" method="post" style="display: inline;">
@@ -138,7 +146,9 @@
               <h5 class="modal-title" id="confirmCloseModalLabel">Conferma Chiusura</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
-            <div class="modal-body">Vuoi confermare la selezione delle pubblicazioni per <span id="closeValutazioneNome"></span>?</div>
+            <div class="modal-body">
+              Vuoi confermare la selezione delle pubblicazioni per <span id="closeValutazioneNome"></span>?
+            </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal" style="margin: 10px 20px; background-color: gray; color: white;">Annulla</button>
               <form id="closeForm" action="" method="post" style="display: inline;">
@@ -167,25 +177,31 @@
     {% endif %}
   </div>
 
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <!-- Il tuo script personalizzato -->
   <script>
-    // Funzione per impostare l'azione del form di cancellazione
-    $('#confirmDeleteModal').on('show.bs.modal', function (event) {
-      var button = $(event.relatedTarget) // Bottone che ha aperto il modale
-      var valutazioneNome = button.data('valutazione') // Estrapola il valore dell'attributo data-valutazione
-      var modal = $(this)
-      var form = modal.find('#deleteForm') // Trova il form all'interno del modale
-      form.attr('action', '{% url "cancella_valutazione" "" %}' + valutazioneNome + '/') // Imposta l'azione del form con il nome della valutazione
-      modal.find('#deleteValutazioneNome').text(valutazioneNome) // Imposta il nome della valutazione nel testo del modale
-    })
+    $(document).ready(function () {
+      // Funzione per impostare l'azione del form di cancellazione
+      $('#confirmDeleteModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Bottone che ha aperto il modale
+        var valutazioneNome = button.data('valutazione') // Estrapola il valore dell'attributo data-valutazione
+        var modal = $(this)
+        var form = modal.find('#deleteForm') // Trova il form all'interno del modale
+        form.attr('action', button.data('url')) // Imposta l'azione del form con il nome della valutazione
+        modal.find('#deleteValutazioneNome').text(valutazioneNome) // Imposta il nome della valutazione nel testo del modale
+      })
     
-    // Funzione per impostare l'azione del form di chiusura
-    $('#confirmCloseModal').on('show.bs.modal', function (event) {
-      var button = $(event.relatedTarget) // Bottone che ha aperto il modale
-      var valutazioneNome = button.data('valutazione') // Estrapola il valore dell'attributo data-valutazione
-      var modal = $(this)
-      var form = modal.find('#closeForm') // Trova il form all'interno del modale
-      form.attr('action', '{% url "chiudi_valutazione" "" %}' + valutazioneNome + '/') // Imposta l'azione del form con il nome della valutazione
-      modal.find('#closeValutazioneNome').text(valutazioneNome) // Imposta il nome della valutazione nel testo del modale
+      // Funzione per impostare l'azione del form di chiusura
+      $('#confirmCloseModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Bottone che ha aperto il modale
+        var valutazioneNome = button.data('valutazione') // Estrapola il valore dell'attributo data-valutazione
+        var modal = $(this)
+        var form = modal.find('#closeForm') // Trova il form all'interno del modale
+        form.attr('action', button.data('url')) // Imposta l'azione del form con il nome della valutazione
+        modal.find('#closeValutazioneNome').text(valutazioneNome) // Imposta il nome della valutazione nel testo del modale
+      })
     })
   </script>
 {% endblock %}

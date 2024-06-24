@@ -7,7 +7,7 @@
 {% block content %}
   <div class="container">
     <!-- Contenuto specifico di selezioni.html -->
-    {% if pubblicazioni %}
+    {% if selezioni_per_autore %}
       {% for docente, pubblicazioni in selezioni_per_autore.items %}
         {% if pubblicazioni %}
           <h2>{{ docente }}</h2>
