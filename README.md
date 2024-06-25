@@ -1,17 +1,20 @@
-### Progetto di tesi
-# Automazione dell'Estrazione delle Pubblicazioni
+# Nome del Progetto Django
 
-Lo scopo di questo progetto è la creazione di un'applicazione web per il caricamneto e l'estrazione delle pubblicazioni dei docenti in maniera automatica.
-I punti principali che sono stati richiesti sono stati:
-* Creazione di una base di dati
-* Gestione separata si segreteria e utenti
-* Integrazione delle credenziali di ateneo per effettuare l'accesso
+## Descrizione
+
+Una breve descrizione del progetto Django, spiegando cosa fa e perché è utile.
+
+## Requisiti
+
+- Python 3.x
+- Django 3.x o successivo
+- Altre librerie specifiche (es. `requests`, `Pillow`, ecc.)
 
 ## Installazione
 
-Guida su come installare il progetto e preparare l'ambiente di sviluppo. Includi prerequisiti, istruzioni di installazione e configurazione.
+1. **Clona il repository:**
 
-```bash
-git clone https://github.com/Hex-Zivi/FUR.git
-cd FUR
-comando-per-installazione
+   ```bash
+   git clone https://github.com/tuo-username/tuo-progetto-django.git
+   cd tuo-progetto-django
+
