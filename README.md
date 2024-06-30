@@ -1,6 +1,9 @@
 # furapp
 
+Lo scopo di questo programma è semplificare la gestione e l'estrazione delle pubblicazioni dei docenti universitari per il calcolo del fondo FUR. L'obiettivo è creare un portale che permetta l'estrazione automatica delle pubblicazioni e la selezione manuale da parte degli autori, rendendo il processo semplice e intuitivo.
+
 ## Preparazione Iniziale
+
 ### Installazione
 
 Per installare il progetto, segui questi passaggi:
@@ -158,9 +161,20 @@ Aprire un terminale nella cartella contenente il programma (contiene il file man
 python3 manage.py runserver
 ```
 
-### Lato utente
+### Lato applicazione
 
-Ogni utente aprendo la pagina verrà immediatamente indirizzato alla pagina di login e potrà accedere utilizzando le proprie credernziali GIA
+Ogni utente aprendo la pagina verrà immediatamente indirizzato alla pagina di login e potrà accedere utilizzando le proprie credernziali GIA.
+
+Per entrambi gli utilizzi, abmministrazione e utente, è impostato un timer di sessione della durata di un'ora, modificabile in FUR/settings.py:
+
+```python
+# Session timeout
+SESSION_EXPIRE_SECONDS = 3600  # secondi
+
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+
+SESSION_TIMEOUT_REDIRECT = '/'
+```
 
 #### Amministrazione
 
@@ -313,4 +327,21 @@ def caricamento_con_file(request, filename, valutazione):
             valutazione.save()
 
     return redirect('modifica_valutazione', valutazione)
-    ```
+```
+
+## Shema sql
+
+Per ottenere uno schema SQL del database è possibile esportarlo col comado da terminale:
+
+```bash
+pg_dump -U myuser -s -f schema.sql mydatabase
+```
+
+## Ringraziamenti
+
+Desidero esprimere la mia sincera gratitudine ai seguenti individui per il loro supporto e i loro preziosi consigli durante lo sviluppo di questo progetto:
+
+- Dr. Belussi Alberto, per la sua guida.
+- Dott.ssa Migliorini Sara, per il suo supporto costante.
+- Dott.ssa Dalla Vecchia Anna, per il suo contributo per l'implementazione dell'algoritmo di selezione.
+- Zanetti Alex, per le impostazioni del server LDAP e i modelli interni di base.
