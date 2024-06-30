@@ -15,8 +15,6 @@ from pathlib import Path
 
 import ldap
 from django_auth_ldap.config import LDAPSearch
-#GroupOfNamesType
-
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -48,9 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'caricamentoDati',
     'bootstrap5',
-    'django.contrib.admindocs', # admindocs, opzionale
+    'django.contrib.admindocs',  # admindocs, opzionale
 ]
-
 
 
 MIDDLEWARE = [
@@ -99,14 +96,6 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-'''
 
 
 # Password validation
@@ -149,8 +138,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    #os.path.join(BASE_DIR, 'static'),
-    os.path.join(BASE_DIR, 'caricamentoDati/static'),  # Esempio per l'app mio_app
+    # os.path.join(BASE_DIR, 'static'),
+    # Esempio per l'app mio_app
+    os.path.join(BASE_DIR, 'caricamentoDati/static'),
 
 
     # Altre cartelle statiche delle app possono essere aggiunte qui
@@ -195,11 +185,13 @@ AUTHENTICATION_BACKENDS = (
     "django_auth_ldap.backend.LDAPBackend",
     "django.contrib.auth.backends.ModelBackend",
 )
-AUTH_USER_MODEL = 'caricamentoDati.CustomUser'
 
 # Session timeout
-SESSION_EXPIRE_SECONDS = 3600 #secondi
+SESSION_EXPIRE_SECONDS = 3600  # secondi
 
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
 SESSION_TIMEOUT_REDIRECT = '/'
+
+
+AUTH_USER_MODEL = 'caricamentoDati.CustomUser'
