@@ -6,9 +6,11 @@ import datetime
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 
 from django.contrib.auth.models import AbstractUser, Group, Permission
-from django.db.models.signals import post_migrate
+from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django.dispatch import receiver
+from django.core.management import call_command
 
 
 class CustomUser(AbstractUser):
@@ -22,6 +24,11 @@ class CustomUser(AbstractUser):
 
 def __str__(self):
     return self.username
+
+@receiver(post_save, sender=CustomUser)
+def update_auth_user(sender, instance, **kwargs):
+    # Chiama il comando custom definito
+    call_command('fix_user')
 
 
 # Aggiungi questo decorator per eseguire la funzione dopo che il cache delle app è pronto

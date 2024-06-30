@@ -14,6 +14,18 @@
         <button class="btn" type="button" onclick="submitCalcolaForm()">Calcola</button>
       </form>
     </div>
+
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body" style="display: flex; align-items: center;">
+            <img src="{% static 'loading.gif' %}" alt="Caricamento" style="width: 50px; height: 50px; display: inline;">
+            <p style="display: inline; margin-left: 30px;">Operazione in corso, potrebbe richiedere qualche minuto...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div style="padding: 20px;">
       <h2>Azzera assegnamento</h2>
       <form id="azzeraForm" action="{% url 'azzera_assegnamento' valutazione.nome %}" method="post">
@@ -132,6 +144,41 @@
 </div>
 
 <script>
+  function openConfirmModal() {
+    $('#confirmModal').modal('show');
+  }
+
+  document.getElementById('confirmAzzeraButton').addEventListener('click', function () {
+    document.getElementById('azzeraForm').submit();
+  });
+
+
+function submitCalcolaForm() {
+  // Mostra il modal
+  $('#loadingModal').modal({
+    backdrop: 'static',
+    keyboard: false
+  });
+
+  // Invia il form
+  document.getElementById('calcolaForm').submit();
+}
+
+
+  function loadModalContent() {
+    var url = "{% url 'aggiungi_pubblicazione_pagina' valutazione_nome=valutazione.nome caller='modifica' docente='admin' %}"
+    fetch(url, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById('modalContent').innerHTML = data.html
+      })
+      .catch((error) => console.error('Errore nel caricamento del contenuto del modale:', error))
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     // Seleziona il pulsante di applicazione dei filtri
     var applicaFiltriBtn = document.getElementById('applicaFiltriBtn');

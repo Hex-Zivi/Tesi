@@ -17,25 +17,25 @@
         <div style="display: flex;">
           <div style="flex: 2;">
             <div class="form-group col-md-4">
-              <label for="handle" class="col-form-label">Handle:</label>
+              <label for="handle" class="col-form-label">Handle*:</label>
             </br>
               <input type="text" class="form-control" name="handle" id="handle" required />
             </div>
           </br>
             <div class="form-group col-md-4">
-              <label for="titolo" class="col-form-label">Titolo:</label>
+              <label for="titolo" class="col-form-label">Titolo*:</label>
             </br>
               <input type="text" class="form-control" name="titolo" id="titolo" required />
             </div>
           </br>
             <div class="form-group col-md-4">
-              <label for="anno_pubblicazione" class="col-form-label">Anno di pubblicazione:</label>
+              <label for="anno_pubblicazione" class="col-form-label">Anno di pubblicazione*:</label>
             </br>
               <input type="text" class="form-control" name="anno_pubblicazione" id="anno_pubblicazione" required />
             </div>
           </br>
             <div class="form-group col-md-4">
-              <label for="miglior_quartile" class="col-form-label">Miglior quartile:</label>
+              <label for="miglior_quartile" class="col-form-label">Miglior quartile*:</label>
             </br>
               <input type="text" class="form-control" name="miglior_quartile" id="miglior_quartile" required />
             </div>
@@ -53,7 +53,7 @@
             </div>
           </br>
             <div class="form-group col-md-4">
-              <label for="tipologia_collezione" class="col-form-label">Tipologia collezione:</label>
+              <label for="tipologia_collezione" class="col-form-label">Tipologia collezione*:</label>
             </br>
               <input type="text" class="form-control" name="tipologia_collezione" id="tipologia_collezione" required />
             </div>
@@ -69,6 +69,8 @@
 
               {{ form_aggiungi_pubblicazione.indicizzato_scopus }}
             </div>
+          </br>
+            <p>(I campi indicati con * sono obbligatori)</p>
           </div>
 
           <div style="flex: 2;">
