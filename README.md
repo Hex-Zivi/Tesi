@@ -191,3 +191,126 @@ Per ogni valutazione viene mostrato il suo stato e una serie di pulsanti che rim
 #### Utente
 
 L'utente ha solo la possibilità di accedere alle proprie pubblicazioni contenute nelle Valutazioni per la selezione ed eventualmente aggiungerne.
+
+## L'algoritmo
+
+L'algoritmo di estrazione segue un ordine di precedenza:
+
+Questa porzione viene eseguita solo una volta
+
+1. Selezione delle pubblicazioni appartenenti alle riviste eccellenti (per peso maggiore)
+
+2. Selezione delle pubblicazioni per autori con numero di pubblicazioni inferiore o uguale al numero richiesto (per massimizzare il numero di selezioni)
+
+Questa porzione viene ripetuta ciclicamente in modo che l'agoritmo cerchi di assegnare le pubblicazioni con peso maggiore
+
+3. Selezione delle pubblicazioni con quartile uguale a 0 o 1 e con singolo autore (per peso maggiore e migliore selezione)
+
+Da qui in poi l'algoritmo cerca di assegnare le pubblicazioni massimizzandone il valore, ma con la difficoltà di dover "risolvere" i conflitti
+
+4. Selezione di pubblicazioni con autori multipli con quartile uguale a 0 o 1, sulla base degli autori che hanno già raggiunto il numero massimo di pubblicazioni da assegnare
+
+5. Come il punto 3, ma con qurtile uguale a 2
+
+6. Come il punto 4, ma con quartile uguale a 2
+
+7. Come i punti 3 e 5, ma con quartili uguali o maggiori di 3
+
+8. Come i punti 4 e 6, ma con quartili uguali o maggiori di 3
+
+Resta la possibilità che alla fine dell'esecuzione dell'algoritmo, alcuni autori non abbiano raggiunto il numero di pubblicazioni richieste. Nella pagina di assegnamento (a disposizione per l'amministrazione), e possibile vedere quali sono i casi per i quali è necessario intervenire manualomente (per troppi conflitti), oppure semplicemente non sono disponibili abbastanza pubblicazioni.
+
+
+## NOTA
+
+Il file CSV per l'importazione delle pubblicazioni segue un formato ben specifico.
+Questo formato può essere rispettato nei file csv, oppure, per comodità, è possibile modificare la vista per il caricamento e adattarlo al formato più conveniente in caricamentoDati/views.py, modificando:
+
+```python
+def caricamento_con_file(request, filename, valutazione):
+    if request.method == 'POST':
+        file = request.FILES.get('filename')
+        valutazione = Valutazione.objects.get(nome=valutazione)
+        elenco = []
+        intestazione = ['anno_di_pubblicazione', 'autore', 'codice_fiscale', 'handle', 'doi', 'titolo',
+                        'tipologia_collezione',
+                        'issn_o_isbn', 'titolo_rivista_o_atti', 'indicizzato_scopus', 'miglior_quartile_scopus',
+                        'num_coautori_interni_dip', 'codice_fiscale']
+        riferimento = []
+        if file:
+            # Determina il tipo di file
+            if file.name.endswith('.csv'):
+                csv_data = csv.reader(file.read().decode(
+                    'utf-8').splitlines(), delimiter=',')
+                for valore in csv_data:
+                    elenco.append(valore)
+            elif filename.endswith('.xlsx'):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                for row in sheet.iter_rows(values_only=True):
+                    elenco.append(row)
+            else:
+                # Gestisci il caso in cui il tipo di file non è supportato
+                return HttpResponse("Il tipo di file non è supportato.")
+
+            for element in elenco[5]:
+                for titolo in intestazione:
+                    if element.lower() == titolo:
+                        riferimento.append(intestazione.index(titolo))
+
+            with transaction.atomic():
+
+                # In assenza di un file di caricamento veritiero, ho aggiunto una colonna per il codice fiscale alla fine: modificare i numeri delle colonne in maniera consona
+                for riga in elenco[6:]:
+                    anno_pubblicazione = riga[0]
+                    autore = riga[1]
+                    handle = riga[2]
+                    doi = riga[3]
+                    titolo = riga[4]
+                    tipologia_collezione = riga[5]
+                    issn_isbn = riga[6]
+                    titolo_rivista_atti = riga[7]
+                    titolo_rivista_atti = titolo_rivista_atti.upper()
+                    indicizzato_scopus = riga[8].lower()
+                    if indicizzato_scopus in ['vero', '1', 'true']:
+                        indicizzato_scopus = True
+                    else:
+                        indicizzato_scopus = False
+                    if riga[9] == '':
+                        miglior_quartile = 0
+                    else:
+                        miglior_quartile = int(riga[9])
+                    num_coautori_dip = riga[10]
+                    codice_fiscale = riga[11]
+                    autore = autore.upper()
+                    codice_fiscale = codice_fiscale.upper()
+
+                    if not Docente.objects.filter(codiceFiscale=codice_fiscale).exists():
+                        Docente(codiceFiscale=codice_fiscale,
+                                cognome_nome=autore).save()
+
+                    if not PubblicazionePresentata.objects.filter(handle=handle).exists():
+                        PubblicazionePresentata(handle=handle,
+                                                issn_isbn=issn_isbn,
+                                                anno_pubblicazione=anno_pubblicazione,
+                                                doi=doi,
+                                                titolo=titolo,
+                                                tipologia_collezione=tipologia_collezione,
+                                                titolo_rivista_atti=titolo_rivista_atti,
+                                                indicizzato_scopus=indicizzato_scopus,
+                                                miglior_quartile=miglior_quartile,
+                                                num_coautori_dip=num_coautori_dip,
+                                                valutazione=valutazione).save()
+
+                    if not RelazioneDocentePubblicazione.objects.filter(pubblicazione=handle,
+                                                                        autore__codiceFiscale=codice_fiscale).exists():
+                        RelazioneDocentePubblicazione(pubblicazione=PubblicazionePresentata.objects.get(handle=handle),
+                                                      autore=Docente.objects.get(codiceFiscale=codice_fiscale)).save()
+
+        if valutazione.status == "Vuota":
+            valutazione.status = "Pubblicazioni caricate"
+            valutazione.dataCaricamentoPubblicazioni = datetime.date.today()
+            valutazione.save()
+
+    return redirect('modifica_valutazione', valutazione)
+    ```

@@ -509,6 +509,8 @@ def assegnamento_algoritmo(request, valutazione_nome):
 
     progresso = 1  # flag di verifica di aggiunta selezione
 
+
+    # Selezione per le riviste eccellenti
     for rivista in riviste_ecc:
         if rivista.issn2:
             lista_issn = rivista.issn1, rivista.issn2
@@ -543,6 +545,7 @@ def assegnamento_algoritmo(request, valutazione_nome):
                         pubblicazioni = pubblicazioni.exclude(
                             relazionedocentepubblicazione__autore=docente, num_coautori_dip=1)
 
+    # Selezioni per autori con numero di pubblicazioni troppo basso
     for docente in docenti:
         if len(relazioni_docente_pubblicazione.filter(autore=docente)) <= numero_selezioni_valutazione:
             for relazione in relazioni_docente_pubblicazione.filter(autore=docente):
