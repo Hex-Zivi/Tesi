@@ -2,39 +2,34 @@
 
 Lo scopo di questo programma è semplificare la gestione e l'estrazione delle pubblicazioni dei docenti universitari per il calcolo del fondo FUR. L'obiettivo è creare un portale che permetta l'estrazione automatica delle pubblicazioni e la selezione manuale da parte degli autori, rendendo il processo semplice e intuitivo.
 
+</br>
+</br>
+
 ## Preparazione Iniziale
 
 ### Installazione
 
-Per installare il progetto, segui questi passaggi:
-
 1. Clona il repository:
    ```bash
-   git clone https://github.com/tuo-username/tuo-progetto-django.git
-   cd tuo-progetto-django
-
+   git clone https://github.com/Hex-Zivi/Tesi.git
+   cd Tesi
    ```
 
-2. Entrare nella cartella e aprire un terminale.
-   Eseguire il comando per l'installazione dei pacchetti:
+2. Assicurati di avere Django installato.
+
+3. Esegui il comando per l'installazione dei pacchetti:
    
    ```bash
    pip install -r requirements.txt
    ```
 ### Configurazione dell'url
 
-Configurare l'url in FUR/settings.py:
+Modifica FUR/settings.py:
 
-```python
-ALLOWED_HOSTS = ['localhost']
-ALLOWED_HOSTS=['127.0.0.1']
-#ALLOWED_HOSTS = []
-```
-
-
-Ed disattivare il debugger impostando in FUR/settings.py:
 ```python
 DEBUG = False
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 ```
 
 ### Configurazione del Database
@@ -59,6 +54,14 @@ DATABASES = {
 FUR/settings.py modifica la configurazione del server LDAP a seconda delle tue necessità:
 
 ```python
+import ldap
+from django_auth_ldap.config import LDAPSearch
+
+
+#...
+#...
+#...
+
 AUTH_LDAP_SERVER_URI = 'ldap://localhost'
 LDAP_DOMAIN = "dc=univr,dc=it"
 
@@ -93,7 +96,7 @@ AUTHENTICATION_BACKENDS = (
 
 ### Migrazione del Database
 
-Per collegare la base di dati è sufficiente usare i comandi:
+Esegui nel terminale:
 
 ```bash
 python3 manage.py makemigrations
@@ -102,33 +105,37 @@ python3 manage.py migrate
 
 In questo modo si creeranno i modelli necessari al funzionamento. Successivamente, bisogna configurare il modello utente personalizzato (CustomUser) come utente di default di Django.
 
-In FUR/settings.py, aggiungi:
+Aggiungi in FUR/settings.py:
 
 ```python
 AUTH_USER_MODEL = 'caricamentoDati.CustomUser'
 ```
 
-Esegui nuovamente le migrazioni:
+Esegui nuovamente:
 
 ```bash
 python3 manage.py makemigrations
 python3 manage.py migrate
 ```
 
+</br>
+</br>
+
 ## Primo utilizzo
 
 Prima di poter utilizzare il programma è necessario creare un superutente che possa accedere alla pagina di amministrazione
 
 ### Creare un superuser
-Aprire un terminale nella cartella principale e usare il comando:
+
+Crea un superuser:
 
 ```python
 python3 manage.py createsuperuser
 ```
 
-E seguire la procedura, sarà necessario fornire un Username, una mail e una password
+E seguire la procedura, sarà necessario fornire un Username, una mail e una password.
 
-A questo punto sarà possibile avviare il server
+Avvia il server:
 
 ```bash
 python3 manage.py runserver
@@ -136,7 +143,7 @@ python3 manage.py runserver
 
 Gli Utenti potranno accedere al server con le proprie credenziali GIA.
 
-Il superutente può accedere alla pagina di amministrazione:
+Accedi alla pagina di amministrazione:
 
 ```url
 [url_dell'applicazione]/admin
@@ -154,8 +161,7 @@ In alternativa si possono impostare metodi di riconoscimento autmatico, avendo l
 
 ### Lato server
 
-Prima che il programma possa essere utilizzato dagli utenti è necessario avviare il server.
-Aprire un terminale nella cartella contenente il programma (contiene il file manage.py) e utilizzare il comando:
+Avvia il server:
 
 ```bash
 python3 manage.py runserver
@@ -163,13 +169,14 @@ python3 manage.py runserver
 
 ### Lato applicazione
 
-Ogni utente aprendo la pagina verrà immediatamente indirizzato alla pagina di login e potrà accedere utilizzando le proprie credernziali GIA.
+Gli utenti possono accedere con le proprie credenziali GIA.
 
-Per entrambi gli utilizzi, abmministrazione e utente, è impostato un timer di sessione della durata di un'ora, modificabile in FUR/settings.py:
+![login](README/login.png)
+
+Per la sessione, in FUR/settings.py:
 
 ```python
-# Session timeout
-SESSION_EXPIRE_SECONDS = 3600  # secondi
+SESSION_EXPIRE_SECONDS = 3600
 
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
@@ -178,67 +185,26 @@ SESSION_TIMEOUT_REDIRECT = '/'
 
 #### Amministrazione
 
-Nella schermata iniziale l'amministrazione avrà a disposizione l'elenco delle Valutazioni già caricate, ordinate in ordine decrescente di data, e un modulo per aggiungere nuove Valutazioni (richiede tre campi: Nome, Anno e Numero di pubblicazioni da assegnare)
+L'amministrazione può gestire le valutazioni, caricare pubblicazioni da CSV, assegnare pubblicazioni, chiudere valutazioni ed esportare i dati.
 
-Per ogni valutazione viene mostrato il suo stato e una serie di pulsanti che rimandano a diverse pagine
-
-1. Modifica, permette di:
-   1. Permette di caricare le pubblicazioni da un file CSV
-   2. Aggiungere singole pubblicazioni
-   3. Gestire le Riviste Eccellenti
-
-
-2. Assegna Pubblicazioni, permette di:
-   1. Utilizzare l'algoritmo di selezione
-   2. Azzerare tutte le selezioni effettuate
-   3. Aggiungere singole pubblicazioni
-   4. Visualizzare le selezioni
-   5. Accedere alle singole pubblicazione per autore per la selezione manuale
-
-
-3. Cancella, per eliminare la Valutazione
-4. Chiudi, per chiudere la valutazione e permettere l'esportazione
-5. Visualizza Selezioni
-6. Esporta CSV per: Esportare le selezioni (solo se la valutazione è chiusa)
-
+![home](README/home.png)
 
 #### Utente
 
-L'utente ha solo la possibilità di accedere alle proprie pubblicazioni contenute nelle Valutazioni per la selezione ed eventualmente aggiungerne.
+L'utente può accedere alle proprie pubblicazioni nelle valutazioni e selezionarle.
 
-## L'algoritmo
+### L'algoritmo
 
-L'algoritmo di estrazione segue un ordine di precedenza:
-
-Questa porzione viene eseguita solo una volta
-
-1. Selezione delle pubblicazioni appartenenti alle riviste eccellenti (per peso maggiore)
-
-2. Selezione delle pubblicazioni per autori con numero di pubblicazioni inferiore o uguale al numero richiesto (per massimizzare il numero di selezioni)
-
-Questa porzione viene ripetuta ciclicamente in modo che l'agoritmo cerchi di assegnare le pubblicazioni con peso maggiore
-
-3. Selezione delle pubblicazioni con quartile uguale a 0 o 1 e con singolo autore (per peso maggiore e migliore selezione)
-
-Da qui in poi l'algoritmo cerca di assegnare le pubblicazioni massimizzandone il valore, ma con la difficoltà di dover "risolvere" i conflitti
-
-4. Selezione di pubblicazioni con autori multipli con quartile uguale a 0 o 1, sulla base degli autori che hanno già raggiunto il numero massimo di pubblicazioni da assegnare
-
-5. Come il punto 3, ma con qurtile uguale a 2
-
-6. Come il punto 4, ma con quartile uguale a 2
-
-7. Come i punti 3 e 5, ma con quartili uguali o maggiori di 3
-
-8. Come i punti 4 e 6, ma con quartili uguali o maggiori di 3
-
-Resta la possibilità che alla fine dell'esecuzione dell'algoritmo, alcuni autori non abbiano raggiunto il numero di pubblicazioni richieste. Nella pagina di assegnamento (a disposizione per l'amministrazione), e possibile vedere quali sono i casi per i quali è necessario intervenire manualomente (per troppi conflitti), oppure semplicemente non sono disponibili abbastanza pubblicazioni.
+L'algoritmo di estrazione segue un ordine di precedenza per selezionare le pubblicazioni, partendo dalle riviste eccellenti fino a risolvere i conflitti tra autori.
 
 
 ## NOTA
 
-Il file CSV per l'importazione delle pubblicazioni segue un formato ben specifico.
-Questo formato può essere rispettato nei file csv, oppure, per comodità, è possibile modificare la vista per il caricamento e adattarlo al formato più conveniente in caricamentoDati/views.py, modificando:
+Il file CSV deve rispettare un formato specifico.
+
+![Formato del csv](README/formato_csv.png)
+
+È possibile adattare la vista per il caricamento in caricamentoDati/views.py:
 
 ```python
 def caricamento_con_file(request, filename, valutazione):
@@ -329,7 +295,8 @@ def caricamento_con_file(request, filename, valutazione):
     return redirect('modifica_valutazione', valutazione)
 ```
 
-## Shema sql
+
+## Schema sql
 
 Per ottenere uno schema SQL del database è possibile esportarlo col comado da terminale:
 
@@ -339,9 +306,9 @@ pg_dump -U myuser -s -f schema.sql mydatabase
 
 ## Ringraziamenti
 
-Desidero esprimere la mia sincera gratitudine ai seguenti individui per il loro supporto e i loro preziosi consigli durante lo sviluppo di questo progetto:
+Ringrazio per il contributo:
 
-- Dr. Belussi Alberto, per la sua guida.
-- Dott.ssa Migliorini Sara, per il suo supporto costante.
-- Dott.ssa Dalla Vecchia Anna, per il suo contributo per l'implementazione dell'algoritmo di selezione.
-- Zanetti Alex, per le impostazioni del server LDAP e i modelli interni di base.
+- Dr. Belussi Alberto
+- Dott.ssa Migliorini Sara
+- Dott.ssa Dalla Vecchia Anna
+- Zanetti Alex

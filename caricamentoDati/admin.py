@@ -2,6 +2,10 @@ from django.contrib import admin
 from . import models
 from .models import CustomUser
 
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ['codice_fiscale', 'last_name', 'first_name']
+    search_fields = ['last_name', 'first_name']
+
 class ValutazioneAdmin(admin.ModelAdmin):
     list_display = ['nome', 'anno', 'status', 'dataCaricamento']
 
@@ -38,4 +42,4 @@ admin.site.register(models.Docente, DocenteAdmin)
 admin.site.register(models.RivistaEccellente, RivistaEccellenteAdmin)
 admin.site.register(models.PubblicazionePresentata, PubblicazionePresentataAdmin)
 admin.site.register(models.RelazioneDocentePubblicazione, RelazioneDocentePubblicazioneAdmin)
-admin.site.register(CustomUser)
+admin.site.register(models.CustomUser, CustomUserAdmin)

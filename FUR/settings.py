@@ -30,9 +30,8 @@ SECRET_KEY = 'django-insecure-jk@6&7ru(&m(en9#@l5zc9%k7-u-iz7*=*72&=7p7hd!$c3gb2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-#ALLOWED_HOSTS = ['localhost']
-#ALLOWED_HOSTS=['127.0.0.1']
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+#ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -88,12 +87,12 @@ WSGI_APPLICATION = 'FUR.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'fur',
-        'USER': 'andrea',
-        'PASSWORD': '31415926',
-        'HOST': 'localhost',
-        'PORT': '5432',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'nome_base_di_dati',
+            'USER': 'utente',
+            'PASSWORD': '######',
+            'HOST': 'localhost',
+            'PORT': '5432',
     }
 }
 
